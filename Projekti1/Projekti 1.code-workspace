@@ -1,8 +1,24 @@
 {
-	"folders": [
-		{
-			"path": ".."
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "path": ".."
+    }
+  ],
+  "settings": {
+    "sqltools.connections": [
+      {
+        "mysqlOptions": {
+          "authProtocol": "default",
+          "enableSsl": "Disabled"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3306,
+        "driver": "MariaDB",
+        "name": "flight_game",
+        "database": "flight_game",
+        "username": "root"
+      }
+    ]
+  }
 }
