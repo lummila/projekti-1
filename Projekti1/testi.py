@@ -183,3 +183,4 @@ connection = mysql.connector.connect(
 
 testi = rottaDestinations()
 print(rottaEmissions(testi))
+print(sqlCountryQuery(DEST_ICAO[12]))
