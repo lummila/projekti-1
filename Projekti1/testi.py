@@ -3,16 +3,16 @@
 LÄTINÄÄ
 
 -MAAT-
-Ensimmäisen kierroksen mahdolliset lentokentät (maiden nimet ja ICAO-koodit):
+Ensimmäisen kierroksen lentokentät (maiden nimet ja ICAO-koodit):
 Ruotsi(ESSA), Norja(ENGM), Latvia(EVRA), Tanska(EKCH), Liettua(EYVI)
 
-Toisen kierroksen mahdolliset lentokentät:
+Toisen kierroksen lentokentät:
 Puola(EPWA), Saksa(EDDB), Alankomaat(EHAM), Slovakia(LZIB), Tsekki(LKPR)
 
-Kolmannen kierroksen mahdolliset lentokentät:
+Kolmannen kierroksen lentokentät:
 Itävalta(LOWW), Unkari(LHBP), Belgia(EBBR), Serbia(LYBE), Kroatia(LDZA)
 
-Neljännen kierroksen mahdolliset lentokentät:
+Neljännen kierroksen lentokentät:
 Sveitsi(LSZH), Italia(LIRN), Ranska(LFPO), UK(EGLL), Irlanti(EIDW)
 
 Viides kierros eli maalimaat:
@@ -20,7 +20,8 @@ Espanja(LEBL), Portugali(LPPT), Tenerife(GCTS), Fuerteventura(GCFV), Gran Canari
 
 -MEKANIIKAT-
 
-
+- Pelaajalla on n kierrosta aikaa päästä viidennen tason maahan, jossa rotta on
+- Pelaajalla on x määrä valuuttaa pelin alussa
 
 '''
 
@@ -29,7 +30,8 @@ import math
 import random
 import mysql.connector
 
-DESTINATION_ICAO = {
+# Jokaisen pelin maan ICAO-koodit. Numeropari on se, millä näitä kutsutaan, ja teksti on se, mikä palautuu.
+DEST_ICAO = {
     11: "ESSA",  # Ruotsi (HUOM Eka kiekka)
     12: "ENGM",  # Norja
     13: "EVRA",  # Latvia
@@ -57,7 +59,7 @@ DESTINATION_ICAO = {
     55: "GCLP",  # Gran Canaria
 }
 
-DESTINATION_TIPS = {
+DEST_TIPS = {
     # Ruotsi (HUOM Eka kiekka)
     11: "Rakas vihollismaamme, varsinkin jääkiekossa.",
     12: "Siellä on kuulemma todella paljon vuoristoja ja öljyä.",  # Norja
@@ -88,28 +90,30 @@ DESTINATION_TIPS = {
 }
 
 
-# Rotan reitti tasojen läpi
+# Rotan satunnaisesti päätetty reitti tasojen läpi
 def rottaDestinations():
     output = []
-    for level in range(1, 6):
+    for level in range(1, 6):  # 1-5
         rand = random.randint(1, 5)
         # Esim. 2 + 20 = 22, eli EDDB, Saksa
         output.append(rand + (level * 10))
-    return output
+    return output  # Lista, jossa yksi koodi joka tason maalle, viimeinen on maali
 
 
 # Palauttaa CO^2 kiloina rotan matkan päästöt = optimaalinen määrä mihin pelaajaa verrataan
 def rottaEmissions(rottaList):
     total = 0
     for entry in range(len(rottaList) - 1):
-        coords = sqlDistanceQuery(
-            DESTINATION_ICAO[rottaList[entry]], DESTINATION_ICAO[rottaList[entry + 1]])
+        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
+        coords = sqlCoordinateQuery(
+            DEST_ICAO[rottaList[entry]], DEST_ICAO[rottaList[entry + 1]])
+        # Käytetään checkForDistia, ja syötetään true argumentiksi, jotta tulos saadaan emissiomääränä
         grams = checkForDist(coords, True)
         total += grams
-    return total / 1000
+    return total / 1000  # Total on grammoina, jaetaan tonnilla, ja saadaan kiloina ulos
 
 
-# Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi.
+# Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi. Lyhentää koodeja, joissa tehdään SQL-hakuja
 def sqlPointer(code):
     pointer = connection.cursor()
     pointer.execute(code)
@@ -118,16 +122,15 @@ def sqlPointer(code):
     return (pointer, result)
 
 
-# SQL-haku kahdella ICAO-tunnuksella, palauttaa listan, jossa kaksi tuplea, joissa koordinaatit
-def sqlDistanceQuery(start, dest):
+# SQL-haku kahdella ICAO-tunnuksella, palauttaa listan, jossa kaksi tuplea, joissa koordinaatit.
+def sqlCoordinateQuery(start, dest):
     locationList = []
 
+    # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
     for x in range(2):
         sql = "select longitude_deg, latitude_deg from airport "
-        if x == 0:
-            sql += f"where ident = '{start}';"
-        else:
-            sql += f"where ident = '{dest}';"
+        # Jos x on 0, kyseessä on ensimmäinen haku, eli käytetään start-muuttujaa, ja toisella kerralla dest-muuttujaa.
+        sql += f"where ident = '{start if x == 0 else dest}';"
 
         # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
         (pointer, result) = sqlPointer(sql)
@@ -136,38 +139,36 @@ def sqlDistanceQuery(start, dest):
             print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
             return -1
         else:
+            # Lisätään locationList-listaan tuple, jossa koordinaatit
             locationList.append(result[0])
-
+    # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
     return locationList
 
 
+# Ottaa parametriksi ICAO-koodin, jonka avulla etsii tietokannasta oikean maan nimen.
 def sqlCountryQuery(icao):
     sql = "select country.name from country "
-    sql += "where country.iso_country in ("
+    sql += "where country.iso_country in ("  # Fancy sulkuhaku
     sql += "select airport.iso_country from airport "
     sql += f"where ident = '{icao}');"
 
+    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
     (pointer, result) = sqlPointer(sql)
 
-    if pointer.rowcount <= 0:
+    if pointer.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
         return -1
     else:
         # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
-        # result = [(Suomi,)] / result[0] = (Suomi,) / result[0][0] = Suomi
+        # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
         return result[0][0]
 
 
-# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlDistanceQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
+# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
 def checkForDist(locs, emissions: bool):
     output = distance.distance(locs[0], locs[1]).km
     # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
     return output if not emissions else output * 115
-
-
-# Palauttaa CO^2 g / km integraalina
-def emissions(locs):
-    return checkForDist(locs) * 115
 
 
 # SQL-yhteyden luominen tietokannan käyttöä varten
@@ -181,6 +182,4 @@ connection = mysql.connector.connect(
 )
 
 testi = rottaDestinations()
-print(testi)
-print(f"{rottaEmissions(testi):.2f} kiloa päästöjä.")
-print(sqlCountryQuery(DESTINATION_ICAO[11]))
+print(rottaEmissions(testi))
