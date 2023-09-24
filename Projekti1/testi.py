@@ -88,6 +88,36 @@ DESTINATION_TIPS = {
 }
 
 
+# Rotan reitti tasojen läpi
+def rottaDestinations():
+    output = []
+    for level in range(1, 6):
+        rand = random.randint(1, 5)
+        # Esim. 2 + 20 = 22, eli EDDB, Saksa
+        output.append(rand + (level * 10))
+    return output
+
+
+# Palauttaa CO^2 kiloina rotan matkan päästöt = optimaalinen määrä mihin pelaajaa verrataan
+def rottaEmissions(rottaList):
+    total = 0
+    for entry in range(len(rottaList) - 1):
+        coords = sqlDistanceQuery(
+            DESTINATION_ICAO[rottaList[entry]], DESTINATION_ICAO[rottaList[entry + 1]])
+        grams = checkForDist(coords, True)
+        total += grams
+    return total / 1000
+
+
+# Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi.
+def sqlPointer(code):
+    pointer = connection.cursor()
+    pointer.execute(code)
+    result = pointer.fetchall()
+
+    return (pointer, result)
+
+
 # SQL-haku kahdella ICAO-tunnuksella, palauttaa listan, jossa kaksi tuplea, joissa koordinaatit
 def sqlDistanceQuery(start, dest):
     locationList = []
@@ -99,9 +129,8 @@ def sqlDistanceQuery(start, dest):
         else:
             sql += f"where ident = '{dest}';"
 
-        pointer = connection.cursor()
-        pointer.execute(sql)
-        result = pointer.fetchall()
+        # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
+        (pointer, result) = sqlPointer(sql)
 
         if pointer.rowcount <= 0:
             print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
@@ -112,9 +141,33 @@ def sqlDistanceQuery(start, dest):
     return locationList
 
 
-# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlDistanceQuery palauttaa)
-def checkForDist(locs):
-    return distance.distance(locs[0], locs[1]).km
+def sqlCountryQuery(icao):
+    sql = "select country.name from country "
+    sql += "where country.iso_country in ("
+    sql += "select airport.iso_country from airport "
+    sql += f"where ident = '{icao}');"
+
+    (pointer, result) = sqlPointer(sql)
+
+    if pointer.rowcount <= 0:
+        print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
+        return -1
+    else:
+        # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
+        # result = [(Suomi,)] / result[0] = (Suomi,) / result[0][0] = Suomi
+        return result[0][0]
+
+
+# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlDistanceQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
+def checkForDist(locs, emissions: bool):
+    output = distance.distance(locs[0], locs[1]).km
+    # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
+    return output if not emissions else output * 115
+
+
+# Palauttaa CO^2 g / km integraalina
+def emissions(locs):
+    return checkForDist(locs) * 115
 
 
 # SQL-yhteyden luominen tietokannan käyttöä varten
@@ -127,8 +180,7 @@ connection = mysql.connector.connect(
     autocommit=True
 )
 
-# testi = sqlDistanceQuery("EFHK", "EGLL")
-# # print(testi)
-# matka = checkForDist(testi) if testi != -1 else print("VIRHE!")
-# print(f"Etäisyys: {matka:0.3f} kilometriä.")
-print(DESTINATION_TIPS[25])
+testi = rottaDestinations()
+print(testi)
+print(f"{rottaEmissions(testi):.2f} kiloa päästöjä.")
+print(sqlCountryQuery(DESTINATION_ICAO[11]))
