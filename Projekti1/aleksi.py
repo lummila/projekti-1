@@ -2,6 +2,43 @@
 import mysql.connector
 
 
+def getColumn(column: str):
+    pointer = connection.cursor()
+    sql = f"select {column} from game where screen_name = '{currentUser}';"
+    pointer.execute(sql)
+    result = pointer.fetchall()
+
+    return False if not result else result[0][0]
+
+
+def money(action: str, amount: int):
+    # Ainoat käytettävät toiminnot funktiossa: Lisää, poista, aseta
+    if action not in ["add", "remove", "set"] or amount < 0:
+        print("ERROR in money() function arguments")
+        return False
+
+    currentMoney = getColumn("money")
+    pointer = connection.cursor()
+
+    sql = "update game set money = "
+
+    if action == "set":
+        # Asetetaan määrä pyydetyksi
+        sql += f"{amount} "
+    elif action == "add":
+        # Lisätään pyydetty määrä
+        sql += f"(money + {amount}) "
+    elif action == "remove":
+        # Jos rahaa on vähemmän kuin pitäisi poistaa, laitetaan nollille. Muuten vain vähennetään.
+        sql += f"0 " if amount >= currentMoney else f"(money - {amount}) "
+
+    sql += f"where screen_name = '{currentUser}';"
+
+    pointer.execute(sql)
+
+    return True
+
+
 def login(username: str):
     pointer = connection.cursor()
     username = username.lower()
@@ -98,5 +135,16 @@ connection = mysql.connector.connect(
 )
 
 print("---------------------------------")
-testi = input("Enter username: ")
-login(testi)
+currentUser = input("Enter username: ").lower()
+login = login(currentUser)
+
+if not login:
+    print("Exiting game.")
+    exit()
+
+muny = input("Add / Remove / Set? ").lower()
+amount = int(input("Enter amount: "))
+
+print(getColumn("money"))
+money(muny, amount)
+print(getColumn("money"))
