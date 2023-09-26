@@ -8,29 +8,35 @@ def getColumn(column: str):
     pointer.execute(sql)
     result = pointer.fetchall()
 
-    return False if not result else result[0][0]
+    if not result:
+        print("ERROR in getColumn() arguments.")
+        return False
+    else:
+        return result[0][0]
 
 
-def money(action: str, amount: int):
+# Käytetään arvojen päivittämiseen valitussa kolumnissa, VAROVASTI NIIDEN ARGUMENTTIEN KANSSA!
+# Column EI SAA olla: id, screen_name, passcode, location
+# SAA OLLA: co2_consumed, co2_budget, money
+def updateValue(column: str, action: str, amount: int):
     # Ainoat käytettävät toiminnot funktiossa: Lisää, poista, aseta
     if action not in ["add", "remove", "set"] or amount < 0:
-        print("ERROR in money() function arguments")
+        print("ERROR in updateValue() function arguments.")
         return False
 
-    currentMoney = getColumn("money")
+    currentValue = getColumn(column)
     pointer = connection.cursor()
-
-    sql = "update game set money = "
+    sql = f"update game set {column} = "
 
     if action == "set":
         # Asetetaan määrä pyydetyksi
         sql += f"{amount} "
     elif action == "add":
         # Lisätään pyydetty määrä
-        sql += f"(money + {amount}) "
+        sql += f"({column} + {amount}) "
     elif action == "remove":
         # Jos rahaa on vähemmän kuin pitäisi poistaa, laitetaan nollille. Muuten vain vähennetään.
-        sql += f"0 " if amount >= currentMoney else f"(money - {amount}) "
+        sql += f"0 " if amount >= currentValue else f"({column} - {amount}) "
 
     sql += f"where screen_name = '{currentUser}';"
 
@@ -142,9 +148,14 @@ if not login:
     print("Exiting game.")
     exit()
 
+collu = input("What column to alter? ").lower()
 muny = input("Add / Remove / Set? ").lower()
 amount = int(input("Enter amount: "))
 
-print(getColumn("money"))
-money(muny, amount)
-print(getColumn("money"))
+if "exit" in [collu, muny, amount]:
+    print("Exiting game.")
+    exit()
+
+print(getColumn(collu))
+updateValue(collu, muny, amount)
+print(getColumn(collu))
