@@ -39,7 +39,6 @@ def updateValue(column: str, action: str, amount: int):
         sql += f"0 " if amount >= currentValue else f"({column} - {amount}) "
 
     sql += f"where screen_name = '{currentUser}';"
-
     pointer.execute(sql)
 
     return True
