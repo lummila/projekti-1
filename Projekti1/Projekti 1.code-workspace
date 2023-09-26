@@ -18,6 +18,19 @@
         "name": "flight_game",
         "database": "flight_game",
         "username": "root"
+      },
+      {
+        "mysqlOptions": {
+          "authProtocol": "default",
+          "enableSsl": "Disabled"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3306,
+        "driver": "MariaDB",
+        "name": "velkajahti",
+        "username": "root",
+        "database": "velkajahti"
       }
     ]
   }
