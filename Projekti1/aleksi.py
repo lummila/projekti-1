@@ -2,17 +2,15 @@
 import mysql.connector
 
 
+# Palauttaa pyydetyn kolummnin arvon nykyiseltä pelaajalta. Käytä pienellä kirjoitettuja "nimiä", vaikka funktiossa onkin .lower() varmistajana
 def getColumn(column: str):
     pointer = connection.cursor()
-    sql = f"select {column} from game where screen_name = '{currentUser}';"
+    sql = f"select {column.lower()} from game where screen_name = '{currentUser}';"
+
     pointer.execute(sql)
     result = pointer.fetchall()
 
-    if not result:
-        print("ERROR in getColumn() arguments.")
-        return False
-    else:
-        return result[0][0]
+    return result[0][0]
 
 
 # Käytetään arvojen päivittämiseen valitussa kolumnissa, VAROVASTI NIIDEN ARGUMENTTIEN KANSSA!
@@ -46,7 +44,7 @@ def updateValue(column: str, action: str, amount: int):
 
 def login(username: str):
     pointer = connection.cursor()
-    username = username.lower()
+    username = username.upper()
 
     sql = "select screen_name from game "
     sql += f"where screen_name = '{username}';"
@@ -89,8 +87,9 @@ def login(username: str):
 
             pointer.reset()
             pointer.execute(sqlNewPIN)
+
             newUser = input(
-                "User created! You can now log in: ").lower()
+                "User created! You can now log in: ").upper()
 
             if newUser == "exit":
                 exit()
@@ -103,7 +102,7 @@ def login(username: str):
         oldUserPIN = input("Input your 4-digit PIN code: ")
 
         # Käyttäjän pitää aina päästä ulos
-        if oldUserPIN.lower() == "exit":
+        if oldUserPIN.upper() == "exit":
             exit()
 
         oldUserPIN = int(oldUserPIN)
@@ -134,13 +133,13 @@ connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
     database="velkajahti",
-    user="root",
-    password="metropolia",
+    user="vj_admin",
+    password="velkajahti",
     autocommit=True
 )
 
 print("---------------------------------")
-currentUser = input("Enter username: ").lower()
+currentUser = input("Enter username: ").upper()
 login = login(currentUser)
 
 if not login:
