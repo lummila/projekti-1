@@ -149,12 +149,12 @@ if not login:
 
 collu = input("What column to alter? ").lower()
 muny = input("Add / Remove / Set? ").lower()
-amount = int(input("Enter amount: "))
+amount = input("Enter amount: ")
 
 if "exit" in [collu, muny, amount]:
     print("Exiting game.")
     exit()
 
 print(getColumn(collu))
-updateValue(collu, muny, amount)
+updateValue(collu, muny, int(amount))
 print(getColumn(collu))
