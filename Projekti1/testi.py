@@ -63,32 +63,31 @@ DEST_ICAO = {
 
 DEST_TIPS = {
     # Ruotsi (HUOM Eka kiekka)
-    11: "Rakas vihollismaamme, varsinkin jääkiekossa.",
-    12: "Siellä on kuulemma todella paljon vuoristoja ja öljyä.",  # Norja
-    13: "Se etelänaapurimme etelänaapuri.",  # Latvia
-    14: "Sieltä tulee ainakin Legoja, ja kaikki ajavat pyörällä.",  # Tanska
-    15: "Siellä ainakin kolmasosa koko maasta on metsää, ja sillä on virallinen tuoksu.",  # Liettua
-    21: "Se on vodkan kotimaa.",  # Puola (HUOM Toka kierros)
-    22: "Kaljan ja makkaran luvattu maa.",  # Saksa
-    23: "Jos hyvä tuuri käy, ehdin käydä kahvilassa tai punaisten lyhtyjen kadulla.",  # Alankomaat
-    24: "Nuoret opiskelijat voivat matkustaa ilmaiseksi junalla siellä.",  # Slovakia
-    25: "Olen kuullut, että se on todella hyvä jääkiekossa, "
-    "ja siellä on eniten linnoja Euroopassa!",  # Tsekki
-    31: "lorem",  # Itävalta (HUOM Kolmas kierros)
-    32: "lorem",  # Unkari
-    33: "lorem",  # Belgia
-    34: "lorem",  # Serbia
-    35: "lorem",  # Kroatia
-    41: "lorem",  # Sveitsi (HUOM Neljäs kierros)
-    42: "lorem",  # Italia
-    43: "lorem",  # Ranska
-    44: "lorem",  # UK
-    45: "lorem",  # Irlanti
-    51: "lorem",  # Espanja (HUOM Viides kierros)
-    52: "lorem",  # Portugali
-    53: "lorem",  # Tenerife
-    54: "lorem",  # Fuerteventure
-    55: "lorem",  # Gran Canaria
+    11: "Our beloved enemy, especially in hockey.",
+    12: "I've heard they have a lot of crude oil and beautiful mountain lines!",  # Norja
+    13: "The southern neighbor of our southern neighbor...",  # Latvia
+    14: "They're the source of lego's and everyone rides a bicycle!",  # Tanska
+    15: "At least a third of the country is covered with forest and it has an official scent.",  # Liettua
+    21: "The birthplace of vodka!",  # Puola (HUOM Toka kierros)
+    22: "The promised land of beer and sausage!",  # Saksa
+    23: "If I get lucky, I might find time to visit a coffee shop or the red light district.",  # Alankomaat
+    24: "Young students are able to travel there by train with no extra cost.",  # Slovakia
+    25: "I've heard they're very good in hockey and they have the most castles in all of Europe.",  # Tsekki
+    31: "The home country of a famous action star and a not so beloved dictator.",  # Itävalta (HUOM Kolmas kierros)
+    32: "The beloved language related to Finnish! The president is not too interested in democracy",  # Unkari
+    33: "Is there anything better than a serving of waffles and some delicious chocolate!",  # Belgia
+    34: "The home country of the famous Tesla, not the car...",  # Serbia
+    35: "Unfortunately this country doesn't let Bosnian people have a swim.",  # Kroatia
+    41: "I might buy a watch made by a famous brand! This could be a setback to my budget.",  # Sveitsi (HUOM Neljäs kierros)
+    42: "Ordering pineapple on your food in a restaurant... people have been killed for less.",  # Italia
+    43: "Weird food and romantic sights! The president has something in common with a known pastry",  # Ranska
+    44: "Does this island have anything besides football?",  # UK
+    45: "Catch the small green creature and acquire unfathomable riches! Don't forget Guinness!'",  # Irlanti
+    51: "The promised land of bullfights and delicious food!",  # Espanja (HUOM Viides kierros)
+    52: "The country of amazing wine. The people might sound like drunk Spaniards.",  # Portugali
+    53: "The largest one of the Spanish islands on the coast of Western Africa",  # Tenerife
+    54: "Easternmost one of the Spanish islands on the coast of western Africa.",  # Fuerteventure
+    55: "The dream island location of elderly Finnish pensioners on the coast of Western Africa.",  # Gran Canaria
 }
 
 
