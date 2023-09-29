@@ -96,12 +96,27 @@ def gameStart():
     rottadestinations = rottaDestinations()
     rottagame = [rottadestinations, rottaPrice(rottadestinations), rottaEmissions(rottadestinations), 4]
     gamestart = [rottadestinations[0], 1000, 0]
+    print(f"Welcome to the game. You will start from {(sqlCountryQuery(DEST_ICAO[gamestart[0]]))}. You have {gamestart[1]} euros to start with. Your emissions are {gamestart[2]}.")
     return rottagame, gamestart
+'''
+#feikkistatsit pelin finalRoundin testausta varten
+def fakeFinalGame(rottagame):
+    fakedestinations = rottaDestinations()
+    print(fakedestinations)
+    fakedestinations[len(fakedestinations)-1] = rottagame[4]
+    print(fakedestinations)
+    fakegame = [fakedestinations, rottaPrice(fakedestinations), rottaEmissions(fakedestinations),5]
+    print(fakegame)'''
 
-#Suvi: viimeisen pelin funktiot. Kun kierros on 4. Vertaa rahat, emissiot ja päästöt
-def finalRound():
-    pass
+#Suvi: viimeisen pelin funktiot. # After reaching the goal the game will calculate your final points by summing up
+# how many rounds you used, your emissions and the money that's left.
+'''def finalRound(round, gamestats, rottagame):
+    if round >= 4 and rottagame[3] == gamestats[len(gamestats)]:
 
+        #laskemme pisteet
+        rottapoints =
+    else:
+    pass'''
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
 def rottaDestinations():
@@ -240,5 +255,6 @@ print(checkForDist(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]),
 print(f" This is price: {checkForPrice(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]))}")
 print(f"This is rat emissions {rottaEmissions(testi)}")
 print(f"This is rat price {rottaPrice(testi)}")
-geimi = gameStart()
+#geimi = gameStart()
 print(gameStart())
+#print(fakeFinalGame(testi))
