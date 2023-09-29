@@ -113,6 +113,21 @@ def rottaEmissions(rottaList):
         total += grams
     return total / 1000  # Total on grammoina, jaetaan tonnilla, ja saadaan kiloina ulos
 
+#Suvi: Ottaa parametriksi koordinaatit. Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e.
+#Suvi: Laskee saman 4 kertaa.
+def rottaPrice(rottaList):
+    totaldistance=0
+    for i in range(len(rottaList) -1):
+        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
+        coords = sqlCoordinateQuery(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
+        print(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
+        distanceforonetrip = float(distance.distance(coords[0], coords[1]).km)
+        totaldistance += distanceforonetrip
+        print(totaldistance)
+    totalprice = (len(rottaList)-1) * 100
+    totalprice += (totaldistance / 10)
+    return (round(totalprice,2))
+
 
 # Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi. Lyhentää koodeja, joissa tehdään SQL-hakuja
 def sqlPointer(code):
@@ -171,12 +186,13 @@ def checkForDist(locs, emissions: bool):
     # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
     return output if not emissions else output * 115
 
-#Suvi: Ottaa parametriksi koordinaatit. Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e
+#Suvi: Ottaa argumenteiksi koordinaatit (minkä sqlCoordinateQuery palauttaa). Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e
+#voiko haitata pyöristys?
 def checkForPrice(coords):
     trip = float(distance.distance(coords[0], coords[1]).km)
     price = 100
     price += (trip/10)
-    return(price)
+    return(round(price, 2))
 
 
 # SQL-yhteyden luominen tietokannan käyttöä varten
@@ -200,6 +216,7 @@ connection = mysql.connector.connect(
 
 testi = rottaDestinations()
 print(testi)
+print(len(testi))
 #destinations1 = print(testi[1])
 print(sqlCountryQuery(DEST_ICAO[11]))
 print(sqlCountryQuery(DEST_ICAO[12]))
@@ -209,3 +226,5 @@ print(testemissions)
 print(checkForDist(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]), True))
 print(checkForDist(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]), False))
 print(f" This is price: {checkForPrice(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]))}")
+print(f"This is rat emissions {rottaEmissions(testi)}")
+print(f"This is rat price {rottaPrice(testi)}")
