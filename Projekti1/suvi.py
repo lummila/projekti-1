@@ -96,8 +96,8 @@ def gameStart():
     rottadestinations = rottaDestinations()
     rottagame = {"rat_destinations": rottadestinations, "rat_price": rottaPrice(rottadestinations), "rat_emissions": rottaEmissions(rottadestinations), }
     gamestart = {"start_position" : rottadestinations[0], "money" : 1000, "emissions" : 0}
-    print(rottagame)
-    print(gamestart)
+    return rottagame, gamestart
+
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
 def rottaDestinations():
