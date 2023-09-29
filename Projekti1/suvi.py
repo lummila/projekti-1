@@ -128,10 +128,10 @@ def rottaPrice(rottaList):
     for i in range(len(rottaList) -1):
         # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
         coords = sqlCoordinateQuery(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
-        print(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
+        #print(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
         distanceforonetrip = float(distance.distance(coords[0], coords[1]).km)
         totaldistance += distanceforonetrip
-        print(totaldistance)
+        #print(totaldistance)
     totalprice = (len(rottaList)-1) * 100
     totalprice += (totaldistance / 10)
     return (round(totalprice,2))
