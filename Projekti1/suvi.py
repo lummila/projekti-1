@@ -90,6 +90,14 @@ DEST_TIPS = {
     55: "The dream island location of elderly Finnish pensioners on the coast of Western Africa.",  # Gran Canaria
 }
 
+#Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
+# Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktiot.
+def gameStart():
+    rottadestinations = rottaDestinations()
+    rottagame = {"rat_destinations": rottadestinations, "rat_price": rottaPrice(rottadestinations), "rat_emissions": rottaEmissions(rottadestinations), }
+    gamestart = {"start_position" : rottadestinations[0], "money" : 1000, "emissions" : 0}
+    print(rottagame)
+    print(gamestart)
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
 def rottaDestinations():
@@ -228,3 +236,4 @@ print(checkForDist(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]),
 print(f" This is price: {checkForPrice(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]))}")
 print(f"This is rat emissions {rottaEmissions(testi)}")
 print(f"This is rat price {rottaPrice(testi)}")
+print(gameStart())
