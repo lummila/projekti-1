@@ -39,7 +39,9 @@ import random
 
 
 # coincidence functions
-positive_coincidence = ('positive_1', 'positive_2', 'positive_3', 'positive_4', 'positive_5')
+no_coincidence = 'no coincidence'
+
+positive_coincidence = {'positive_1', 'positive_2', 'positive_3', 'positive_4', 'positive_5', 'no_coincidence'}
 positive_1 = ("Nice! You found a 100€ bill on the airport floor. "
               "100e will be added to your account")
 positive_2 = ("You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill! "
@@ -51,19 +53,35 @@ positive_4 = ("Lucky you! The flight company made a mistake with your tickets. Y
 positive_5 = ("The airplane took a shorter route. Emissions were 10kg less than expected."
               " 10kg of emissions will be removed")
 
-negative_coincidence = ('negative_1', 'negative_2', 'negative_3', 'negative_4', 'negative_5')
+negative_coincidence = {'negative_1', 'negative_2', 'negative_3', 'negative_4', 'negative_5', 'no_coincidence'}
 
-no_coincidence = ('no coincidence')
+negative_1 = ("The airport lost your luggage... You'll have to wait one night at the airport."
+              " one turn is used")
+negative_2 = ("Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning."
+              "one turn is used")
+negative_3 = ("You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in."
+              " 100e will be removed from your account")
+negative_4 = ("Your luggage was over weight. The fee for extra kilos is 50e."
+              " 50e will be removed from your account")
+negative_5 = ("The aircraft underestimated the flight's emissions. The emissions were 15kg higher than expected."
+              " 15kg of emissions will be added")
+
+airport = 0
 def coincidence(positive):
-    if airport == correct:
-        coincidence = random.randint(positive_coincidence, no_coincidence)
+    if location == correct:
+        coincidence = random.randint(positive_coincidence, negative_coincidence)
         print(coincidence)
-        return
-    elif airport != correct:
-        coincidence = random.randint(negative_coincidence, no_coincidence)
+    elif location != correct:
+        coincidence = random.randint(negative_coincidence, negative_coincidence)
         print(coincidence)
         return
 
+correct = 0
+location = input("Are you in the correct location? ")
+if location == correct:
+    coincidence(location)
+elif location != correct:
+    coincidence(location)
 
 
 
