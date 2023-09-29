@@ -94,12 +94,13 @@ DEST_TIPS = {
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktiot.
 def gameStart():
     rottadestinations = rottaDestinations()
-    rottagame = {"rat_destinations": rottadestinations, "rat_price": rottaPrice(rottadestinations), "rat_emissions": rottaEmissions(rottadestinations), }
-    gamestart = {"start_position" : rottadestinations[0], "money" : 1000, "emissions" : 0}
-    lista = []
-    lista.append(rottagame)
-    lista.append(gamestart)
-    return lista
+    rottagame = [rottadestinations, rottaPrice(rottadestinations), rottaEmissions(rottadestinations), 4]
+    gamestart = [rottadestinations[0], 1000, 0]
+    return rottagame, gamestart
+
+#Suvi: viimeisen pelin funktiot. Kun kierros on 4. Vertaa rahat, emissiot ja päästöt
+def finalRound():
+    pass
 
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
