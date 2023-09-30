@@ -62,7 +62,7 @@ def user_needs_help():  #  Provides the user a quick guide during the game. The 
             result = pointer.fetchall()
             return f'{result}'
 
-
+# a bit rough on the edges
 
 user_needs_help()
 
