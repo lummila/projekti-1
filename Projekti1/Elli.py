@@ -42,20 +42,20 @@ import random
 # coincidence functions
 
 # when the player gets to the right location
-def draw_positive_coincidence(positive_coincidences, negative_coincidences, positive_probability=0.8):
-    positive_probability = max(0, min(positive_probability, 1))
+def draw_positive_coincidence(positive_coincidences, negative_coincidences):
+    positive_probability = 80
     coincidences_list = random.choices([positive_coincidences, negative_coincidences],
-                                       weights=[positive_probability, 1 - positive_probability])
+                                       weights=[80, 20])
     random_coincidence = random.choice(coincidences_list[0])
     return random_coincidence
 
 
 # when the player gets to the wrong location
 
-def draw_negative_coincidence(negative_coincidences, positive_coincidences, negative_probability=0.8):
-    negative_probability = max(0, min(negative_probability, 1))
-    coincidences_list = random.choices([positive_coincidences, negative_coincidences],
-                                       weights=[negative_probability, 1 - negative_probability])
+def draw_negative_coincidence(negative_coincidences, positive_coincidences):
+    negative_probability = 80
+    coincidences_list = random.choices([negative_coincidences, positive_coincidences],
+                                       weights=[80, 20])
     random_coincidence = random.choice(coincidences_list[0])
     return random_coincidence
 
@@ -94,3 +94,5 @@ print(f"{random_positive_coincidence['coincidence']}")
 
 random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
 print(f"{random_negative_coincidence['coincidence']}")
+
+# when the coincidences come in use
