@@ -1,4 +1,4 @@
-'''
+"""
 #############################
 LÄTINÄÄ
 
@@ -23,7 +23,7 @@ Espanja(LEBL), Portugali(LPPT), Tenerife(GCTS), Fuerteventura(GCFV), Gran Canari
 - Pelaajalla on n kierrosta aikaa päästä viidennen tason maahan, jossa rotta on
 - Pelaajalla on x määrä valuuttaa pelin alussa
 
-'''
+"""
 
 # JIIIIHAAAA
 
@@ -90,34 +90,63 @@ DEST_TIPS = {
     55: "The dream island location of elderly Finnish pensioners on the coast of Western Africa.",  # Gran Canaria
 }
 
-#Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
+
+# Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktiot.
 def gameStart():
-    rottadestinations = rottaDestinations()
-    rottagame = [rottadestinations, rottaPrice(rottadestinations), rottaEmissions(rottadestinations), 4]
-    gamestart = [rottadestinations[0], 1000, 0]
-    print(f"Welcome to the game. You will start from {(sqlCountryQuery(DEST_ICAO[gamestart[0]]))}. You have {gamestart[1]} euros to start with. Your emissions are {gamestart[2]}.")
-    return rottagame, gamestart
+    rottadestinations = generate_rottaDestinations()
+    rottagame = {
+        "rotta_destinationslist": rottadestinations,
+        "rotta_price": rottaPrice(rottadestinations),
+        "rotta_emissions": rottaEmissions(rottadestinations),
+        "rotta_rounds": 4,
+    }
+    gamestart_state = {
+        "first_destination": rottadestinations[0],
+        "money": 1000,
+        "emissions": 0,
+    }
+    start_country = sqlCountryQuery(DEST_ICAO[gamestart_state["first_destination"]])
+    start_money = gamestart_state["money"]
+    start_emissions = gamestart_state["emissions"]
+    print(
+        f"Welcome to the game. You will start from {start_country}. You have {start_money} euros to start with. Your emissions are {start_emissions}."
+    )
+    return rottagame, gamestart_state
 
-#feikkistatsit pelin finalRoundin testausta varten
+
+# feikkistatsit pelin finalRoundin testausta varten
 def fakeFinalGame(rottagame):
-    fakedestinations = rottaDestinations()
+    fakedestinations = generate_rottaDestinations()
     print(fakedestinations)
-    fakedestinations[0] = rottagame[0]
+    fakedestinations[0] = rottagame["rotta_destinationslist"][0]
     print(fakedestinations)
-    fakegame = [fakedestinations, rottaPrice(fakedestinations), rottaEmissions(fakedestinations),5]
+    fakegame = {
+        "fake_destinationslist": fakedestinations,
+        "fake_price": rottaPrice(fakedestinations),
+        "fake_emissions": rottaEmissions(fakedestinations),
+        "fake_rounds": 5,
+    }
     print(fakegame)
     return fakegame
 
 
-#Suvi: viimeisen pelin funktiot. # After reaching the goal the game will calculate your final points by summing up
-# how many rounds you used, your emissions and the money that's left.
-def finalRound(round, gamestats, rottagame):
-    print(round, gamestats, rottagame)
+# Suvi: viimeisen pelin funktiot.
+# After reaching the goal the game will calculate your final points by summing up
+# how many rounds you used and your emissions
+# Will print out how much money is left, but it is not a good way to calculate score, because the base
+# fare of 100 e for a flight represents rounds and the distance km is already represented in emissions
+def finalRound(gamestats, rottagame):
+    rowofdestinations = gamestats["fake_destinationslist"]
+    print(f"this is row of destinations {rowofdestinations}")
+    atdestinations = rottagame["rotta_destinationsList"][3]
+    roundscore = (rottagame['rotta_rounds'])/(gamestats['fake_rounds'])
+    emissionscore = (rottagame["rotta-emissions"])/(gamestats["fake_emissions"])
+    scoreprocentage = ((roundscore + emissionscore)/2)*100
 
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
-def rottaDestinations():
+def generate_rottaDestinations():
     output = []
     for level in range(1, 6):  # 1-5
         rand = random.randint(1, 5)
@@ -130,30 +159,35 @@ def rottaDestinations():
 def rottaEmissions(rottaList):
     total = 0
     for entry in range(len(rottaList) - 1):
-        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
+        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1]
+        # tuottaisi virheen, koska mennään listan ulkopuolelle.
         coords = sqlCoordinateQuery(
-            DEST_ICAO[rottaList[entry]], DEST_ICAO[rottaList[entry + 1]])
+            DEST_ICAO[rottaList[entry]], DEST_ICAO[rottaList[entry + 1]]
+        )
         # Käytetään checkForDistia, ja syötetään true argumentiksi, jotta tulos saadaan emissiomääränä
         grams = checkForDist(coords, True)
         total += grams
     return total / 1000  # Total on grammoina, jaetaan tonnilla, ja saadaan kiloina ulos
 
-#Suvi: Ottaa parametriksi koordinaatit. Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e.
-#Suvi: Laskee saman 4 kertaa.
+
+# Suvi: Ottaa parametriksi koordinaatit. Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e.
+# Suvi: Laskee saman 4 kertaa.
 def rottaPrice(rottaList):
-    totaldistance=0
-    print('Rottalist: {}'.format(rottaList))
-    print('Rottalist[0]: {}'.format(rottaList[0]))
-    for i in range(len(rottaList) -1):
+    totaldistance = 0
+    print("Rottalist: {}".format(rottaList))
+    print("Rottalist[0]: {}".format(rottaList[0]))
+    for i in range(len(rottaList) - 1):
         # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
-        coords = sqlCoordinateQuery(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
-        #print(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
+        coords = sqlCoordinateQuery(
+            DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]]
+        )
+        # print(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
         distanceforonetrip = float(distance.distance(coords[0], coords[1]).km)
         totaldistance += distanceforonetrip
-        #print(totaldistance)
-    totalprice = (len(rottaList)-1) * 100
-    totalprice += (totaldistance / 10)
-    return (round(totalprice,2))
+        # print(totaldistance)
+    totalprice = (len(rottaList) - 1) * 100
+    totalprice += totaldistance / 10
+    return round(totalprice, 2)
 
 
 # Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi. Lyhentää koodeja, joissa tehdään SQL-hakuja
@@ -213,35 +247,36 @@ def checkForDist(locs, emissions: bool):
     # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
     return output if not emissions else output * 115
 
-#Suvi: Ottaa argumenteiksi koordinaatit (minkä sqlCoordinateQuery palauttaa). Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e
-#voiko haitata pyöristys?
+
+# Suvi: Ottaa argumenteiksi koordinaatit (minkä sqlCoordinateQuery palauttaa). Laskee etäisyyden. Lisää perushinnaksi 100 e + kilometrit/10 e
+# voiko haitata pyöristys?
 def checkForPrice(coords):
     trip = float(distance.distance(coords[0], coords[1]).km)
     price = 100
-    price += (trip/10)
-    return(round(price, 2))
+    price += trip / 10
+    return round(price, 2)
 
 
 # SQL-yhteyden luominen tietokannan käyttöä varten
 connection = mysql.connector.connect(
-    host='127.0.0.1',
+    host="127.0.0.1",
     port=3306,
-    database='flight_game',
-    user= 'suvi',
-    password = 'HarmaaPoyta123',
-    autocommit = True
-    )
+    database="flight_game",
+    user="suvi",
+    password="HarmaaPoyta123",
+    autocommit=True,
+)
 
-'''connection = mysql.connector.connect(
+"""connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
     database="flight_game",
     user="root",
     password="metropolia",
     autocommit=True
-)'''
+)"""
 
-'''testi = rottaDestinations()
+"""testi = rottaDestinations()
 print(testi)
 print(len(testi))
 #destinations1 = print(testi[1])
@@ -261,13 +296,21 @@ rottapeli = geimi
 print(geimi[1])
 print(geimi[0])
 print(f"tämä on rottapeli : {gameStart()}")
-print(f" tämä on feikkipeli: {fakeFinalGame(geimi[0])}")'''
+print(f" tämä on feikkipeli: {fakeFinalGame(geimi[0])}")"""
 
-geimi = list(gameStart())
-print('geimi lähtö: {}'.format(geimi))
+"""geimi = list(gameStart())
+print("geimi lähtö: {}".format(geimi))
 print(type(geimi))
 print(f"geimi 0 : {geimi[0]}")
 lista = geimi[0][0]
 print(f"lista 0 elemen: {lista[0]}")
-geimi0 = fakeFinalGame(lista)[0]
+geimi0 = fakeFinalGame(lista[0])
 print(f"printing final : {finalRound(geimi0, geimi, geimi[1])}")
+# round, gamestats, rottagame
+"""
+
+fakestats = fakeFinalGame(gameStart()[0])
+print(f"fakestats: {fakestats}")
+rottastats = gameStart()[0]
+print(f"rottastats: {rottastats}")
+print(finalRound(fakestats, rottastats))
