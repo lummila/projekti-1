@@ -98,25 +98,23 @@ def gameStart():
     gamestart = [rottadestinations[0], 1000, 0]
     print(f"Welcome to the game. You will start from {(sqlCountryQuery(DEST_ICAO[gamestart[0]]))}. You have {gamestart[1]} euros to start with. Your emissions are {gamestart[2]}.")
     return rottagame, gamestart
-'''
+
 #feikkistatsit pelin finalRoundin testausta varten
 def fakeFinalGame(rottagame):
     fakedestinations = rottaDestinations()
     print(fakedestinations)
-    fakedestinations[len(fakedestinations)-1] = rottagame[4]
+    fakedestinations[0] = rottagame[0]
     print(fakedestinations)
     fakegame = [fakedestinations, rottaPrice(fakedestinations), rottaEmissions(fakedestinations),5]
-    print(fakegame)'''
+    print(fakegame)
+    return fakegame
+
 
 #Suvi: viimeisen pelin funktiot. # After reaching the goal the game will calculate your final points by summing up
 # how many rounds you used, your emissions and the money that's left.
-'''def finalRound(round, gamestats, rottagame):
-    if round >= 4 and rottagame[3] == gamestats[len(gamestats)]:
+def finalRound(round, gamestats, rottagame):
+    print(round, gamestats, rottagame)
 
-        #laskemme pisteet
-        rottapoints =
-    else:
-    pass'''
 
 # Rotan satunnaisesti päätetty reitti tasojen läpi
 def rottaDestinations():
@@ -144,6 +142,8 @@ def rottaEmissions(rottaList):
 #Suvi: Laskee saman 4 kertaa.
 def rottaPrice(rottaList):
     totaldistance=0
+    print('Rottalist: {}'.format(rottaList))
+    print('Rottalist[0]: {}'.format(rottaList[0]))
     for i in range(len(rottaList) -1):
         # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
         coords = sqlCoordinateQuery(DEST_ICAO[rottaList[i]], DEST_ICAO[rottaList[i + 1]])
@@ -241,7 +241,7 @@ connection = mysql.connector.connect(
     autocommit=True
 )'''
 
-testi = rottaDestinations()
+'''testi = rottaDestinations()
 print(testi)
 print(len(testi))
 #destinations1 = print(testi[1])
@@ -255,6 +255,19 @@ print(checkForDist(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]),
 print(f" This is price: {checkForPrice(sqlCoordinateQuery(DEST_ICAO[testi[0]], DEST_ICAO[testi[1]]))}")
 print(f"This is rat emissions {rottaEmissions(testi)}")
 print(f"This is rat price {rottaPrice(testi)}")
-#geimi = gameStart()
-print(gameStart())
-#print(fakeFinalGame(testi))
+geimi = gameStart()
+list(geimi)
+rottapeli = geimi
+print(geimi[1])
+print(geimi[0])
+print(f"tämä on rottapeli : {gameStart()}")
+print(f" tämä on feikkipeli: {fakeFinalGame(geimi[0])}")'''
+
+geimi = list(gameStart())
+print('geimi lähtö: {}'.format(geimi))
+print(type(geimi))
+print(f"geimi 0 : {geimi[0]}")
+lista = geimi[0][0]
+print(f"lista 0 elemen: {lista[0]}")
+geimi0 = fakeFinalGame(lista)[0]
+print(f"printing final : {finalRound(geimi0, geimi, geimi[1])}")
