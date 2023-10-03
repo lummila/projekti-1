@@ -42,6 +42,7 @@ def main_core(current_stage, rounds_left):
 def game_instructions():
     return f""
 '''
+user_command = "?"
 def user_needs_help(user_command):  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
     user_input_tips = {
         'Exit: ': 'Exit the help module.',
@@ -60,16 +61,17 @@ def user_needs_help(user_command):  #  Provides the user a quick guide during th
             elif user_input.lower() == "status":  #  provides the user the current game status and progress
                 pointer = connection.cursor()
                 sql = (f"SELECT Points, Co2_consumed, Co2_budget, Money, Location "
-                       f"FROM goal, game WHERE Screen_name = {'USERNAME HERE'}") #  missing correct varibles/locations
+                       f"FROM goal, game WHERE Screen_name = {'USERNAME HERE'}") #  missing correct variables/locations
                 pointer.execute(sql)
                 result = pointer.fetchall()
                 return f'{result}'
             else:
                 print("Unknown command")
                 user_input = input("Please enter a command, ? or exit to leave the help module: ")
+
 # a bit rough on the edges
 
-user_needs_help()
+user_needs_help(user_command)
 
 
 player_name = "Karri"
