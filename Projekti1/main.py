@@ -48,11 +48,10 @@ OHJEET = ("Welcome to Chase The Rat!\n\nYou'll need to enter an existing usernam
           "start\ntravelling to the first airport."
           "\nIf you get the given clue correct, and travel to the right airport, the game "
           "will give you a clue to reach the next airport.")
-print("-------------------------")
-print(OHJEET)
-print("-------------------------")
-
-exit()
+# print("-------------------------")
+# print(OHJEET)
+# print("-------------------------")
+# exit()
 
 # TÄMÄ PELITTÄÄ
 
@@ -182,6 +181,7 @@ def login(username: str):
         # Onnistunut sisäänkirjautuminen!
         if username == result[0][0] and oldUserPIN == result[0][1]:
             pelaaja_nimi = result[0][0]
+            print("Successfully logged in!")
             return True
         else:
             print("Something went wrong with login credentials...")
@@ -303,7 +303,7 @@ def game_start():
     }
     player_create = {
         "location": "EFHK",
-        "money": 1000.00,
+        "money": 1000,
         "emissions": 0,
         "round": 0
     }
@@ -329,6 +329,15 @@ connection = mysql.connector.connect(
 )
 #############################
 
+# Ohjeet
+esittele_ohjeet = input(
+    "Do you wish to read the instructions? (Y / N): ").lower()
+if esittele_ohjeet == "exit":
+    exit()
+# Alun selitys
+elif esittele_ohjeet == "y":
+    print(OHJEET)
+
 # LOGIN
 pelaaja_nimi = ""
 kirjautunut = login(input("Please enter your username to log in: "))
@@ -338,14 +347,20 @@ while not kirjautunut:
 # Pelaajan ja rotan init:
 (ROTTA, pelaaja) = game_start()
 
-# Ohjeet
-# Alun selitys
-
+# print("Your first tip for your next destination is:")
+# print(hint(ROTTA['destinations'][1]))
 # main looppi
 while True:
-
+    print(
+        f"Current location: {sqlCountryQuery(pelaaja['location'])}\t"
+        f"Current money: {pelaaja['money']}\t"
+        f"Current round (out of 10): {pelaaja['round']}")
+    pelaajan_input = input("")
     # - pelaajan input
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
 
     exit()
+
+
+#
