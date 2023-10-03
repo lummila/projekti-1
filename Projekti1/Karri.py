@@ -48,8 +48,9 @@ def user_needs_help(user_command):  #  Provides the user a quick guide during th
         'Status: ': 'Show current score and available data.'
     }
     while True:
+        global user_input
         if user_command == "?":
-            user_input = input("Please enter ? or exit to leave the help module: ")
+            user_input = input("Please enter a command, ? or exit to leave the help module: ")
             if user_input == "?":
                 print("Quick commands:")
                 for i, i2 in user_input_tips.items():  #  prints out input tips for the user
@@ -63,6 +64,9 @@ def user_needs_help(user_command):  #  Provides the user a quick guide during th
                 pointer.execute(sql)
                 result = pointer.fetchall()
                 return f'{result}'
+            else:
+                print("Unknown command")
+                user_input = input("Please enter a command, ? or exit to leave the help module: ")
 # a bit rough on the edges
 
 user_needs_help()
