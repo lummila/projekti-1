@@ -32,7 +32,8 @@ DEST_ICAO = {
     55: "GCLP",  # Gran Canaria
 }
 
-OHJEET = ("Welcome to Chase The Rat!\n\nYou'll need to enter an existing username "
+OHJEET = ("------------------------------\n"
+          "Welcome to Chase The Rat!\n\nYou'll need to enter an existing username "
           "and a PIN-code to play with your user\n"
           "OR if you are a new player you can create your own username and a four-digit PIN-code.\n\n"
           "In this game you'll travel between different airports, trying to find 'the rat' who owes "
@@ -58,19 +59,20 @@ OHJEET = ("Welcome to Chase The Rat!\n\nYou'll need to enter an existing usernam
           "\n\nIf you reach the final destination where the rat is within the given rounds: You'll win."
           "\n\nAfter reaching the goal the game will calculate your final points by summing up "
           "\nhow many rounds you used, your emissions and the money that's left."
-          "\n\nIf you don't find The rat within the ten rounds: you'll lose.")
-print("-------------------------")
-print(OHJEET)
-print("-------------------------")
+          "\n\nIf you don't find The rat within the ten rounds: you'll lose."
+          "------------------------------")
 
-exit()
+# exit()
 
 # TÄMÄ PELITTÄÄ
 
 # SQL-funktiot
 
+# HINT-funktio, joka ottaa DEST_ICAO-koodin parametriksi ja palauttaa tekstinä vinkin tietokannasta
 
 # Palauttaa pyydetyn kolummnin arvon nykyiseltä pelaajalta. Käytä pienellä kirjoitettuja "nimiä", vaikka funktiossa onkin .lower() varmistajana
+
+
 def getColumn(column: str):
     pointer = connection.cursor()
     sql = f"select {column.lower()} from game where screen_name = '{pelaaja_nimi}';"
@@ -300,6 +302,13 @@ def checkForDist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
+def status():
+    return print(
+        f"Current location: {sqlCountryQuery(pelaaja['location'])}\t"
+        f"Current money: {pelaaja['money']}\t"
+        f"Current round (out of 10): {pelaaja['round']}")
+
+
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktiot.
 def game_start():
@@ -363,10 +372,7 @@ while not kirjautunut:
 # print(hint(ROTTA['destinations'][1]))
 # main looppi
 while True:
-    print(
-        f"Current location: {sqlCountryQuery(pelaaja['location'])}\t"
-        f"Current money: {pelaaja['money']}\t"
-        f"Current round (out of 10): {pelaaja['round']}")
+    status()
     pelaajan_input = input("")
     # - pelaajan input
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
