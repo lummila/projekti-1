@@ -73,17 +73,20 @@ DEST_TIPS = {
     23: "If I get lucky, I might find time to visit a coffee shop or the red light district.",  # Alankomaat
     24: "Young students are able to travel there by train with no extra cost.",  # Slovakia
     25: "I've heard they're very good in hockey and they have the most castles in all of Europe.",  # Tsekki
-    31: "The home country of a famous action star and a not so beloved dictator.",  # Itävalta (HUOM Kolmas kierros)
+    # Itävalta (HUOM Kolmas kierros)
+    31: "The home country of a famous action star and a not so beloved dictator.",
     32: "The beloved language related to Finnish! The president is not too interested in democracy",  # Unkari
     33: "Is there anything better than a serving of waffles and some delicious chocolate!",  # Belgia
     34: "The home country of the famous Tesla, not the car...",  # Serbia
     35: "Unfortunately this country doesn't let Bosnian people have a swim.",  # Kroatia
-    41: "I might buy a watch made by a famous brand! This could be a setback to my budget.",  # Sveitsi (HUOM Neljäs kierros)
+    # Sveitsi (HUOM Neljäs kierros)
+    41: "I might buy a watch made by a famous brand! This could be a setback to my budget.",
     42: "Ordering pineapple on your food in a restaurant... people have been killed for less.",  # Italia
     43: "Weird food and romantic sights! The president has something in common with a known pastry",  # Ranska
     44: "Does this island have anything besides football?",  # UK
     45: "Catch the small green creature and acquire unfathomable riches! Don't forget Guinness!'",  # Irlanti
-    51: "The promised land of bullfights and delicious food!",  # Espanja (HUOM Viides kierros)
+    # Espanja (HUOM Viides kierros)
+    51: "The promised land of bullfights and delicious food!",
     52: "The country of amazing wine. The people might sound like drunk Spaniards.",  # Portugali
     53: "The largest one of the Spanish islands on the coast of Western Africa",  # Tenerife
     54: "Easternmost one of the Spanish islands on the coast of western Africa.",  # Fuerteventure
@@ -94,19 +97,21 @@ DEST_TIPS = {
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktiot.
 def gameStart():
+    # Esim: [11, 22, 33, 44, 51], vastaavat ICAO-koodeja flygarilistalla
     rottadestinations = generate_rottaDestinations()
     rottagame = {
-        "rotta_destinationslist": rottadestinations,
+        "rotta_destinationslist": rottadestinations,  # Lista
         "rotta_price": rottaPrice(rottadestinations),
         "rotta_emissions": rottaEmissions(rottadestinations),
-        "rotta_rounds": 4,
+        "rotta_rounds": 5,
     }
     gamestart_state = {
         "first_destination": rottadestinations[0],
         "money": 1000,
         "emissions": 0,
     }
-    start_country = sqlCountryQuery(DEST_ICAO[gamestart_state["first_destination"]])
+    start_country = sqlCountryQuery(
+        DEST_ICAO[gamestart_state["first_destination"]])
     start_money = gamestart_state["money"]
     start_emissions = gamestart_state["emissions"]
     print(
@@ -141,7 +146,8 @@ def finalRound(gamestats, rottagame):
     print(f"this is row of destinations {rowofdestinations}")
     atdestinations = rottagame["rotta_destinationsList"][3]
     roundscore = (rottagame['rotta_rounds'])/(gamestats['fake_rounds'])
-    emissionscore = (rottagame["rotta-emissions"])/(gamestats["fake_emissions"])
+    emissionscore = (rottagame["rotta-emissions"]) / \
+        (gamestats["fake_emissions"])
     scoreprocentage = ((roundscore + emissionscore)/2)*100
 
 
@@ -187,7 +193,7 @@ def rottaPrice(rottaList):
         # print(totaldistance)
     totalprice = (len(rottaList) - 1) * 100
     totalprice += totaldistance / 10
-    return round(totalprice, 2)
+    return round(totalprice, 2)  # Palauttaa floatin
 
 
 # Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi. Lyhentää koodeja, joissa tehdään SQL-hakuja
@@ -202,6 +208,7 @@ def sqlPointer(code):
 # SQL-haku kahdella ICAO-tunnuksella, palauttaa listan, jossa kaksi tuplea, joissa koordinaatit.
 def sqlCoordinateQuery(start, dest):
     locationList = []
+    pointer = connection.cursor()
 
     # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
     for x in range(2):
@@ -209,8 +216,10 @@ def sqlCoordinateQuery(start, dest):
         # Jos x on 0, kyseessä on ensimmäinen haku, eli käytetään start-muuttujaa, ja toisella kerralla dest-muuttujaa.
         sql += f"where ident = '{start if x == 0 else dest}';"
 
-        # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-        (pointer, result) = sqlPointer(sql)
+        # SQL:n käyttö
+        pointer.reset()
+        pointer.execute(sql)
+        result = pointer.fetchall()
 
         if pointer.rowcount <= 0:
             print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
@@ -230,7 +239,9 @@ def sqlCountryQuery(icao):
     sql += f"where ident = '{icao}');"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    (pointer, result) = sqlPointer(sql)
+    pointer = connection.cursor()
+    pointer.execute(sql)
+    result = pointer.fetchall()
 
     if pointer.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
