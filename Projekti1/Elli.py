@@ -39,6 +39,9 @@ import random
 # If you don't find The rat within the ten rounds: you'll lose.
 
 
+# help functions instructions:
+#
+
 # coincidence functions
 
 # when the player gets to the right location
