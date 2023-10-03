@@ -17,7 +17,7 @@ import random
 # "The aircraft underestimated the flight's emissions. The emissions were 15kg higher than expected." 15kg of emissions will be added
 
 # Instructions
-# Welcome to Chase the rat! You'll need to enter an existing username and a PIN-code to play with your user
+# Welcome to Chase The Rat! You'll need to enter an existing username and a PIN-code to play with your user
 # OR if you are a new player you can create your own username and a four-digit PIN-code.
 # In this game you'll travel between different airports, trying to find 'the rat' who owes you money.
 # The rat has done some airport-hopping and he has travelled somewhere in Europe.
@@ -89,10 +89,12 @@ negative_coincidences = [{'coincidence': "The airport lost your luggage... "
                          {'coincidence': "You did not get a coincidence."}
                          ]
 
-random_positive_coincidence = draw_positive_coincidence(positive_coincidences, negative_coincidences)
+random_positive_coincidence = draw_positive_coincidence(
+    positive_coincidences, negative_coincidences)
 print(f"{random_positive_coincidence['coincidence']}")
 
-random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
+random_negative_coincidence = draw_negative_coincidence(
+    negative_coincidences, positive_coincidences)
 print(f"{random_negative_coincidence['coincidence']}")
 
 # when the coincidences come in use
