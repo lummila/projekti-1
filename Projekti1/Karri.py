@@ -3,6 +3,8 @@ import random
 import math
 import mysql.connector
 user_command = ""
+current_stage = 0  #  final stage = 5
+rounds_left = 10  #  player can run out of rounds (0... pretty obvious)
 
 '''
 
@@ -14,7 +16,6 @@ DEST_TIPS2 = {51: "The promised land of bullfights and delicious food!",
               54: "Easternmost one of the Spanish islands on the coast of western Africa.",
               55: "The dream island location of elderly Finnish pensioners on the coast of Western Africa."
               }
-
 
 def icao_to_hint():
     while True:
@@ -41,42 +42,58 @@ def main_core(current_stage, rounds_left):
 def game_instructions():
     return f""
 '''
-def user_needs_help():  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
+def user_needs_help(user_command):  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
     user_input_tips = {
         'Exit: ': 'Exit the help module.',
         'Status: ': 'Show current score and available data.'
     }
     while True:
-        user_input = input("Please enter a command or '?' to get help: ")
-        if user_input == "?":
-            print("Quick commands:")
-            for i, i2 in user_input_tips.items():  #  prints out key input tips for the user
-                print(f"{i}, {i2}")
-        elif user_input.lower() == "exit":  #  exits the "instructions" loop with given user input
-            return False
-        elif user_input.lower() == "status":  #  provides the user the current game status and progress
-            pointer = connection.cursor()
-            sql = (f"SELECT goal.Points, Co2_consumed, Co2_budget, Money, Location "
-                   f"FROM goal, game WHERE Screen_name = {'USERNAME HERE'}")
-            pointer.execute(sql)
-            result = pointer.fetchall()
-            return f'{result}'
-
+        if user_command == "?":
+            user_input = input("Please enter ? or exit to leave the help module: ")
+            if user_input == "?":
+                print("Quick commands:")
+                for i, i2 in user_input_tips.items():  #  prints out input tips for the user
+                    print(f"{i}, {i2}")
+            elif user_input.lower() == "exit":  #  exits the "instructions" loop with given user input
+                return False
+            elif user_input.lower() == "status":  #  provides the user the current game status and progress
+                pointer = connection.cursor()
+                sql = (f"SELECT Points, Co2_consumed, Co2_budget, Money, Location "
+                       f"FROM goal, game WHERE Screen_name = {'USERNAME HERE'}") #  missing correct varibles/locations
+                pointer.execute(sql)
+                result = pointer.fetchall()
+                return f'{result}'
 # a bit rough on the edges
 
 user_needs_help()
 
 
+player_name = "Karri"
+player_level = 0
 
-# SQL-yhteyden luominen tietokannan käyttöä varten
-connection = mysql.connector.connect(
-    host="127.0.0.1",
-    port=3306,
-    database="flight_game",
-    user="root",
-    password="metropolia",
-    autocommit=True
-)
+
+def player_stage_up():
+    global player_level  #  "global" keyword gains access to a global variable inside a function
+    player_level += 1
+    return f"Current level: {player_level}"
+
+def rounds_left_decreasing():  #  decreases the amount of rounds the user has left to use
+    global rounds_left
+    rounds_left -= 1
+    return f"{rounds_left}"
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
