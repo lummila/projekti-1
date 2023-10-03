@@ -43,15 +43,27 @@ OHJEET = ("Welcome to Chase The Rat!\n\nYou'll need to enter an existing usernam
           "Your goal is to follow the given clues to try and find him before this.\n\nThere "
           "are a total of ten rounds in each game for you to try to find the rat.\nYou'll "
           "need to unravel the clues and follow the route that the rat took.\n\n"
-          "You have a limited amount of money to spend on your trip and your emissions will alter your final score in the game.\n\n"
-          "The game will start by telling you your first clue and after unravelling it you can "
-          "start\ntravelling to the first airport."
-          "\nIf you get the given clue correct, and travel to the right airport, the game "
-          "will give you a clue to reach the next airport.")
-# print("-------------------------")
-# print(OHJEET)
-# print("-------------------------")
-# exit()
+          "You have a limited amount of money to spend on your trip \n"
+          "and your emissions will alter your final score in the game.\n\n"
+          "The game will start by telling you your first clue "
+          "\nand after unravelling it you can start travelling to the first airport."
+          "\n\nIf you get the given clue correct, and travel to the right airport, \nthe game "
+          "will give you a clue to reach the next airport.\nIf you travel to the wrong airport you'll miss one round."
+          "\n\nWith the clues, you also have chance to be given a coincidence. "
+          "\nThe coincidences can either have a positive OR negative impact on you.\n"
+          "But remember: if you solve the clue the possibility to get a positive coincidence is much higher "
+          "\nAND if you travel to the wrong airport you are more likely to be drawn a negative coincidence."
+          "\n\nEach time you travel you'll use one round "
+          "and \nif you travel to a wrong location, you'll have to wait one extra round."
+          "\n\nIf you reach the final destination where the rat is within the given rounds: You'll win."
+          "\n\nAfter reaching the goal the game will calculate your final points by summing up "
+          "\nhow many rounds you used, your emissions and the money that's left."
+          "\n\nIf you don't find The rat within the ten rounds: you'll lose.")
+print("-------------------------")
+print(OHJEET)
+print("-------------------------")
+
+exit()
 
 # TÄMÄ PELITTÄÄ
 
