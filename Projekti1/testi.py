@@ -118,7 +118,7 @@ def rottaEmissions(rottaList):
 
 
 # Tekee SQL-haun ja palauttaa tuplen, jossa osoitin ja haun tulokset. Parametrinä sql-koodi. Lyhentää koodeja, joissa tehdään SQL-hakuja
-def sqlPointer(code):
+def sql_execute(code):
     pointer = connection.cursor()
     pointer.execute(code)
     result = pointer.fetchall()
@@ -137,7 +137,7 @@ def sqlCoordinateQuery(start, dest):
         sql += f"where ident = '{start if x == 0 else dest}';"
 
         # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-        (pointer, result) = sqlPointer(sql)
+        (pointer, result) = sql_execute(sql)
 
         if pointer.rowcount <= 0:
             print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
@@ -157,7 +157,7 @@ def sqlCountryQuery(icao):
     sql += f"where ident = '{icao}');"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    (pointer, result) = sqlPointer(sql)
+    (pointer, result) = sql_execute(sql)
 
     if pointer.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")

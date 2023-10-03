@@ -70,10 +70,9 @@ OHJEET = ("------------------------------\n"
 
 # HINT-funktio, joka ottaa DEST_ICAO-koodin parametriksi ja palauttaa tekstinä vinkin tietokannasta
 
+
 # -------------------------------------
 # Palauttaa pyydetyn kolummnin arvon nykyiseltä pelaajalta. Käytä pienellä kirjoitettuja "nimiä", vaikka funktiossa onkin .lower() varmistajana
-
-
 def getColumn(column: str):
     pointer = connection.cursor()
     sql = f"select {column.lower()} from game where screen_name = '{pelaaja_nimi}';"
@@ -232,7 +231,7 @@ def generate_rotta():
         total_grams += check_for_dist(coords, True)
 
     # ROTAN MATKOJEN HINTA
-    totaldistance = 0
+    total_distance = 0
     # print("Rottalist: {}".format(output))
     # print("Rottalist[0]: {}".format(output[0]))
     for i in range(len(output) - 1):
