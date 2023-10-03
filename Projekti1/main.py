@@ -17,8 +17,10 @@
 # SQL-yhteys
 
 # main looppi
-# - pelaajan tietojen vetäminen tietokannasta muuttujaan
-# - pelaajan input
-# - ehtolausekkeet sille mitä pelaaja on kirjoittanut
-# - oikean funktion käynnistäminen
-# - pelaajan tietojen uppaaminen
+while True:
+    # - pelaajan tietojen vetäminen tietokannasta muuttujaan
+    # - pelaajan input
+    # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
+    # - oikean funktion käynnistäminen
+    # - pelaajan tietojen uppaaminen
+    exit()
