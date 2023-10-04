@@ -6,6 +6,16 @@ user_command = ""
 current_stage = 0  #  final stage = 5
 rounds_left = 10  #  player can run out of rounds (0... pretty obvious)
 
+quick_guide = ("\n\n------------------------\n"
+               "You have a 10 round limit. You can check how many rounds you"
+               " have left through 'status'.\n\n"
+               "When chasing the rat, you will be able to choose\nwhether to fly"
+               " to the next airport, or \nstay at the current one to earn money."
+               " \nEvery single flight or a stay costs ONE round.\n\n"
+               "Reach the rat by unravelling clues within the round limit"
+               " and win the game!\n"
+               "------------------------\n\n")
+
 '''
 
 #  DEMO DEMO DEMO DEMO DEMO DEMO DEMO DEMO (REQUIRES DATABASE IMPLEMENTATION TO PROCEED FURTHER
@@ -48,18 +58,21 @@ pelaajan_input = input("Provide a command: ")
 
 def user_needs_help(pelaajan_input):  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
     user_input_tips = {
-        'Return: ': 'Continue the game',
-        'Status: ': 'Show current score and available data.'
+        'R (Return): ': 'Continue the game',
+        'S (Status): ': 'Show current score and available data.',
+        'G (Guide):': 'Show quick a quick guide for the game.'
         }
     print("Quick commands: \n")
     for i, i2 in user_input_tips.items():  # prints out input tips for the user
         print(f"{i}, {i2}")
     while True:
-        help_input = input("Please enter a quick command: ")
-        if help_input.lower() == "return":  #  exits the "instructions" loop with given user input
+        help_input = input("Please enter a quick command (R/S/G): ")
+        if help_input.lower().strip() == "r":  #  exits the "instructions" loop with given user input
             return False
-        elif help_input.lower() == "status":  #  provides the user important stats and game progress
+        elif help_input.lower().strip() == "s":  #  provides the user important stats and game progress
             print("status()")
+        elif help_input.lower().strip() == "g":
+            print(quick_guide)
         else:
             print("Unknown command\n")
 
@@ -82,7 +95,7 @@ def rounds_left_decreasing():  #  decreases the amount of rounds the user has le
     global rounds_left
     rounds_left -= 1
     return f"Rounds left: {rounds_left}"
-'''
+
 
 current_round = 1
 round_limit = 10
@@ -115,9 +128,9 @@ def main_game_loop():
             available_airports = []
 
             # Ask the player for their choice
-        choice = input("Do you want to fly or stay and earn money? Enter F/S: ").strip().lower()
+        pelaajan_input = input("Do you want to fly or stay and earn money? Enter F/S: ").strip().lower()
 
-        if choice == "f":  # The player chooses to fly
+        if pelaajan_input == "f":  # The player chooses to fly
             destination = input("Enter the ICAO code of the airport you want to fly to: ").strip().upper()
             #  checks if the user provided ICAO is found in the corresponding list of airports
             if destination in available_airports:
@@ -127,7 +140,7 @@ def main_game_loop():
                 print(f"You have arrived at {destination}!")
             else:
                 print("Invalid ICAO code. Choose an available airport.")
-        elif choice == "s":
+        elif pelaajan_input == "s":
             # The player chooses to stay and earn money
             rounds_left -= 1
             print("You decided to stay at the airport and earn money.")
@@ -141,29 +154,56 @@ def main_game_loop():
     #  player runs out of rounds (10 at the start)
     if rounds_left == 0:
         print("You ran out of rounds. The rat got away. Game over!")
+'''
 
 
+def main_game_loop():
+    player_money_left = 1000
+    current_stage = 0
+    current_airport_icao = "EFHK"
+    rounds_left = 10
 
+    while current_stage < 5:
+        stage = stage[current_stage]
+        hint = "hint function here"
+        correct_airport_icao = stage["correct_airport_icao"]
+        airport_icao_options = stage["airport_icao_options"]
 
+        print(f"\nStage {current_stage + 1}: {hint}")
+        print(f"Current Airport: {current_airport_icao}")
+        print(f"Player Coins: {player_money_left}")
 
+        pelaajan_input = input("Enter an ICAO code or 'S' to earn more money: ").strip().upper()
 
+        if pelaajan_input == "S":
+            print("You stayed at the airport. You earned 100 credits but it cost you one round!")
+            player_money_left += 100
+            rounds_left -= 1
 
+        if player_money_left <= 0:
+            print("Out of money! Get lost! lol")
+            break
 
+        elif pelaajan_input == correct_airport_icao:
+            current_stage += 1
+            player_money_left -= 100
+            current_airport_icao = pelaajan_input
 
+        elif pelaajan_input in airport_icao_options and pelaajan_input != correct_airport_icao:
+            current_airport_icao = pelaajan_input
+            print(f"Rat wasn't here! You are now at {current_airport_icao}.")
+            rounds_left -= 1
+            player_money_left -= 100
+            print(f"You flew to the wrong airport. The rat had been to {correct_airport_icao}.")
+            current_airport_icao = correct_airport_icao
+            print(f"You've been transferred to the correct airport: {current_airport_icao}")
+            rounds_left -= 1
 
+        elif rounds_left == 0:
+            print("You ran out of rounds. YOU LOSE!!!")
+            exit()
 
+    print("\nCongratulations! You've reached the final stage and found the rat!")
+    exit()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+main_game_loop()
