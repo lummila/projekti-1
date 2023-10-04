@@ -351,20 +351,24 @@ connection = mysql.connector.connect(
 )
 #############################
 
+#############################
 # Ohjeet
 esittele_ohjeet = input(
     "Do you wish to read the instructions? (Y / N): ").lower()
 if esittele_ohjeet == "exit":
     exit()
-# Alun selitys
+# Ohjeiden selitys
 elif esittele_ohjeet == "y":
     print(OHJEET)
+#############################
 
+#############################
 # LOGIN
 pelaaja_nimi = ""
 kirjautunut = login(input("Please enter your username to log in: "))
 while not kirjautunut:
     kirjautunut = login(input("Please enter your username to log in: "))
+#############################
 
 # Pelaajan ja rotan init:
 (ROTTA, pelaaja) = game_start()
