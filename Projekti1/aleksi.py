@@ -209,7 +209,7 @@ def generate_rotta():
     return (output, math.floor(total_grams), math.floor(total_price))
 
 
-def sql_destination(icao):
+def sql_destination(icao: str):
     sql = "select airport.name, country.name, airport.ident from country, airport "
     sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
 
@@ -225,7 +225,7 @@ def sql_destination(icao):
         return f"({result[0][2]}) {result[0][0]}, {result[0][1]}"
 
 
-def sql_coordinate_query(start, dest):
+def sql_coordinate_query(start: str, dest: str):
     location_list = []
     pointer = connection.cursor()
 
@@ -373,7 +373,7 @@ time.sleep(1.0)
 #############################
 
 print("\n\nYour first tip for your next destination is:")
-print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"')
+print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"\n')
 
 # main looppi
 while True:
