@@ -129,6 +129,23 @@ def login(username: str):
             return False
 
 
+# Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
+def hint(icao: str):
+    pointer = connection.cursor()
+
+    sql = "select hint from hints "
+    sql += f"where ident = '{icao}';"
+
+    result = pointer.fetchall()
+
+    if not result:
+        return "ERROR fetching hint from hints!"
+    else:
+        return result[0][0]
+
+    return
+
+
 connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,

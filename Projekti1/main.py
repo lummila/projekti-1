@@ -70,9 +70,9 @@ OHJEET = ("------------------------------\n"
 
 # HINT-funktio, joka ottaa DEST_ICAO-koodin parametriksi ja palauttaa tekstinä vinkin tietokannasta
 
+
+# -------------------------------------
 # Palauttaa pyydetyn kolummnin arvon nykyiseltä pelaajalta. Käytä pienellä kirjoitettuja "nimiä", vaikka funktiossa onkin .lower() varmistajana
-
-
 def getColumn(column: str):
     pointer = connection.cursor()
     sql = f"select {column.lower()} from game where screen_name = '{pelaaja_nimi}';"
@@ -110,6 +110,7 @@ def updateValue(column: str, action: str, amount: int):
     pointer.execute(sql)
 
     return True
+# -------------------------------------
 
 
 def login(username: str):
@@ -130,60 +131,60 @@ def login(username: str):
     # Jos käyttäjänimeä ei löydy tietokannasta game -> screen_name
     if not result:
         print("User not found, create a new user? You can also type 'exit' to exit game. (Y = yes / N = no)")
-        loginInput = input("Y / N ").lower()
+        login_input = input("Y / N ").lower()
 
-        while loginInput not in ["y", "n", "exit"]:
-            loginInput = input(
+        while login_input not in ["y", "n", "exit"]:
+            login_input = input(
                 "Invalid command, enter Y, N or exit: ").lower()
 
-        if loginInput == "exit":
+        if login_input == "exit":
             exit()  # Ohjelma sulkeutuu
-        elif loginInput == "n":
+        elif login_input == "n":
             return False  # EI LUODA UUTTA KÄYTTÄJÄÄ, PELI EI ETENE
         # LUODAAN UUSI KÄYTTÄJÄ
-        elif loginInput == "y":
-            newPIN = input(
+        elif login_input == "y":
+            new_PIN = input(
                 "Enter your new 4-digit PIN code: ")
 
             # Jos PIN-koodi ei ole validi
-            while len(newPIN) != 4 or not newPIN.isdigit():
+            while len(new_PIN) != 4 or not new_PIN.isdigit():
                 # Pitää muistaa aina päästää käyttäjä pois
-                if newPIN == "exit":
+                if new_PIN == "exit":
                     exit()
                 else:
-                    newPIN = input(
+                    new_PIN = input(
                         "Entered PIN code is invalid. Please enter a 4-number PIN code: ")
 
             # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
             sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
-            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(newPIN)});"
+            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
 
             pointer.reset()
             pointer.execute(sql_new_user)
 
-            newUser = input(
+            new_user = input(
                 "User created! You can now log in: ").upper()
 
-            if newUser == "EXIT":
+            if new_user == "EXIT":
                 exit()
 
-            return login(newUser)
+            return login(new_user)
     # UUDEN KÄYTTÄJÄN LUONTI LOPPUU
     #########################
     #########################
     else:
-        oldUserPIN = input("Input your 4-digit PIN code: ")
+        old_user_PIN = input("Input your 4-digit PIN code: ")
 
         # Käyttäjän pitää aina päästä ulos
-        if oldUserPIN.upper() == "EXIT":
+        if old_user_PIN.upper() == "EXIT":
             exit()
 
-        oldUserPIN = int(oldUserPIN)
+        old_user_PIN = int(old_user_PIN)
 
-        sqlOldPIN = "select screen_name, passcode from game "
-        sqlOldPIN += f"where screen_name = '{username}' and passcode = {oldUserPIN};"
+        sql_old_PIN = "select screen_name, passcode from game "
+        sql_old_PIN += f"where screen_name = '{username}' and passcode = {old_user_PIN};"
 
-        pointer.execute(sqlOldPIN)
+        pointer.execute(sql_old_PIN)
         result = pointer.fetchall()
 
         if not result:
@@ -193,7 +194,7 @@ def login(username: str):
         #####################
         #####################
         # Onnistunut sisäänkirjautuminen!
-        if username == result[0][0] and oldUserPIN == result[0][1]:
+        if username == result[0][0] and old_user_PIN == result[0][1]:
             pelaaja_nimi = result[0][0]
             print("Successfully logged in!")
             return True
@@ -219,38 +220,38 @@ def generate_rotta():
         output.append(rand + (level * 10))
 
     # ROTAN PÄÄSTÖT
-    totalGrams = 0
+    total_grams = 0
     for entry in range(len(output) - 1):
         # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1]
         # tuottaisi virheen, koska mennään listan ulkopuolelle.
-        coords = sqlCoordinateQuery(
+        coords = sql_coordinate_query(
             DEST_ICAO[output[entry]], DEST_ICAO[output[entry + 1]]
         )
         # Käytetään checkForDistia, ja syötetään true argumentiksi, jotta tulos saadaan emissiomääränä
-        totalGrams += checkForDist(coords, True)
+        total_grams += check_for_dist(coords, True)
 
     # ROTAN MATKOJEN HINTA
-    totaldistance = 0
+    total_distance = 0
     # print("Rottalist: {}".format(output))
     # print("Rottalist[0]: {}".format(output[0]))
     for i in range(len(output) - 1):
         # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
-        coords = sqlCoordinateQuery(
+        coords = sql_coordinate_query(
             DEST_ICAO[output[i]], DEST_ICAO[output[i + 1]]
         )
         # print(DEST_ICAO[output[i]], DEST_ICAO[output[i + 1]])
         distance_for_one_trip = float(
             distance.distance(coords[0], coords[1]).km)
-        totaldistance += distance_for_one_trip
+        total_distance += distance_for_one_trip
         # print(totaldistance)
-    totalPrice = (len(output) - 1) * 100
-    totalPrice += totaldistance / 10
+    total_price = (len(output) - 1) * 100
+    total_price += total_distance / 10
 
-    # Lista, jossa yksi koodi joka tason maalle, viimeinen on maali
-    return (output, math.floor(totalGrams), math.floor(totalPrice))
+    # Tuple, jossa lista Rotan sijainneista, Rotan emissiot ja Rotan matkojen hinta
+    return (output, math.floor(total_grams), math.floor(total_price))
 
 
-def sqlCountryQuery(icao):
+def sql_country_query(icao):
     sql = "select country.name from country "
     sql += "where country.iso_country in ("  # Fancy sulkuhaku
     sql += "select airport.iso_country from airport "
@@ -270,8 +271,8 @@ def sqlCountryQuery(icao):
         return result[0][0]
 
 
-def sqlCoordinateQuery(start, dest):
-    locationList = []
+def sql_coordinate_query(start, dest):
+    location_list = []
     pointer = connection.cursor()
 
     # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
@@ -290,13 +291,13 @@ def sqlCoordinateQuery(start, dest):
             return -1
         else:
             # Lisätään locationList-listaan tuple, jossa koordinaatit
-            locationList.append(result[0])
+            location_list.append(result[0])
     # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
-    return locationList
+    return location_list
 
 
 # Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
-def checkForDist(locs, emissions: bool):
+def check_for_dist(locs, emissions: bool):
     output = distance.distance(locs[0], locs[1]).km
     # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
     return output if not emissions else output * 115
@@ -304,7 +305,7 @@ def checkForDist(locs, emissions: bool):
 
 def status():
     return print(
-        f"Current location: {sqlCountryQuery(pelaaja['location'])}\t"
+        f"Current location: {sql_country_query(pelaaja['location'])}\t"
         f"Current money: {pelaaja['money']}\t"
         f"Current round (out of 10): {pelaaja['round']}")
 
@@ -350,20 +351,24 @@ connection = mysql.connector.connect(
 )
 #############################
 
+#############################
 # Ohjeet
 esittele_ohjeet = input(
     "Do you wish to read the instructions? (Y / N): ").lower()
 if esittele_ohjeet == "exit":
     exit()
-# Alun selitys
+# Ohjeiden selitys
 elif esittele_ohjeet == "y":
     print(OHJEET)
+#############################
 
+#############################
 # LOGIN
 pelaaja_nimi = ""
 kirjautunut = login(input("Please enter your username to log in: "))
 while not kirjautunut:
     kirjautunut = login(input("Please enter your username to log in: "))
+#############################
 
 # Pelaajan ja rotan init:
 (ROTTA, pelaaja) = game_start()
