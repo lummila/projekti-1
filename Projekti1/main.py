@@ -113,18 +113,25 @@ def updateValue(column: str, action: str, amount: int):
 # -------------------------------------
 
 
+# Lyhennys sql:n kanssa kommunikoinnissa
+def sql_execute(code: str):
+    cursor = connection.cursor()
+    cursor.execute(code)
+    result = cursor.fetchall()
+
+    return (cursor, result)
+
+
 def login(username: str):
     if username.lower() == "exit":
         exit()
 
-    pointer = connection.cursor()
     username = username.upper()
 
     sql = "select screen_name from game "
     sql += f"where screen_name = '{username}';"
 
-    pointer.execute(sql)
-    result = pointer.fetchall()
+    (pointer, result) = sql_execute(sql)
 
     #########################
     #########################
@@ -296,6 +303,23 @@ def sql_coordinate_query(start, dest):
     return location_list
 
 
+# Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
+def hint(icao: str):
+    pointer = connection.cursor()
+
+    sql = "select hint from hints "
+    sql += f"where ident = '{icao}';"
+
+    result = pointer.fetchall()
+
+    if not result:
+        return "ERROR fetching hint from hints!"
+    else:
+        return result[0][0]
+
+    return
+
+
 # Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
 def check_for_dist(locs, emissions: bool):
     output = distance.distance(locs[0], locs[1]).km
@@ -373,8 +397,8 @@ while not kirjautunut:
 # Pelaajan ja rotan init:
 (ROTTA, pelaaja) = game_start()
 
-# print("Your first tip for your next destination is:")
-# print(hint(ROTTA['destinations'][1]))
+print("Your first tip for your next destination is:")
+print(hint(DEST_ICAO[ROTTA['destinations'][1]]))
 # main looppi
 while True:
     status()
