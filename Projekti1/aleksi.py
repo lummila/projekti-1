@@ -214,9 +214,9 @@ def sql_destination(icao: str):
     sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    pointer, result = sql_execute(sql)
+    cursor, result = sql_execute(sql)
 
-    if pointer.rowcount <= 0:  # Ei tuloksia
+    if cursor.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
         return -1
     else:
@@ -227,7 +227,6 @@ def sql_destination(icao: str):
 
 def sql_coordinate_query(start: str, dest: str):
     location_list = []
-    pointer = connection.cursor()
 
     # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
     for x in range(2):
@@ -236,12 +235,10 @@ def sql_coordinate_query(start: str, dest: str):
         sql += f"where ident = '{start if x == 0 else dest}';"
 
         # SQL:n käyttö
-        pointer.reset()
-        pointer.execute(sql)
-        result = pointer.fetchall()
+        cursor, result = sql_execute(sql)
 
-        if pointer.rowcount <= 0:
-            print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
+        if cursor.rowcount <= 0:
+            print("ERROR calculating coordinates in sql_coordinate_query()")
             return -1
         else:
             # Lisätään locationList-listaan tuple, jossa koordinaatit
@@ -252,13 +249,10 @@ def sql_coordinate_query(start: str, dest: str):
 
 # Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
 def hint(icao: str):
-    pointer = connection.cursor()
-
     sql = "select hint from hints "
     sql += f"where ident = '{icao}';"
 
-    pointer.execute(sql)
-    result = pointer.fetchall()
+    _, result = sql_execute(sql)
 
     if not result:
         return "ERROR fetching hint from hints!"
@@ -275,17 +269,49 @@ def check_for_dist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
+def display_hint(current_location: str):
+    # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
+    location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
+    hint_index = 0
+
+    if location < 10:
+        hint_index = 1
+    elif location < 20:
+        hint_index = 2
+    elif location < 30:
+        hint_index = 3
+    elif location < 40:
+        hint_index = 4
+    elif location < 50:
+        hint_index = 5
+    else:
+        hint_index = 6
+
+    return hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
+
+
 # Hakee SQL:stä listan mahdollisia lentokohteita ja printtaa ne pelaajalle luettavaksi.
 def possible_flight_locations(current_location: str, can_advance: bool):
+    # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
+    # Jos pelaajalla on lupa edetä, näyttää seuraavan tason maat, jos ei, nykyiset.
     possible_loc = location - 10 if can_advance else location - 20
 
     print("Possible flight locations (type the 4-letter code to travel to said airport):")
     if possible_loc < 0:
-        for x in range(11, 16):
+        for x in range(11, 16):  # Printtaa DEST_ICAOn numeroiden mukaan
             print(sql_destination(DEST_ICAO[x]))
     elif 0 < possible_loc < 10:
         for x in range(21, 26):
+            print(sql_destination(DEST_ICAO[x]))
+    elif 10 < possible_loc < 20:
+        for x in range(31, 36):
+            print(sql_destination(DEST_ICAO[x]))
+    elif 20 < possible_loc < 30:
+        for x in range(41, 46):
+            print(sql_destination(DEST_ICAO[x]))
+    else:
+        for x in range(51, 56):
             print(sql_destination(DEST_ICAO[x]))
 
     return
@@ -293,21 +319,65 @@ def possible_flight_locations(current_location: str, can_advance: bool):
 
 # Printtaa pelaajalle tilanteen, ei palauta mitään
 def status():
+    os.system("cls")
+
     # Printtaa pelaajan sijainnin (flygari, maa, ICAO-koodi), rahat ja kierroksen/10
-    print("\n------------------------------\n"
+    print("------------------------------\n"
           f"Location: {sql_destination(pelaaja['location'])}\n"
-          f"Money: {pelaaja['money']}\n"
+          f"Money: {pelaaja['money']} €\n"
           f"Round: {pelaaja['round']}/10\n"
           "------------------------------\n")
+
+    # Printtaa pelaajan tämänhetkisen vihjeen
+    print(
+        "Rumour for the Rat's next destination:\n" + "\x1B[3m" +
+        f'"{display_hint(pelaaja["location"])}"' + "\x1B[0m" + "\n")
 
     # Listaa pelaajalle mahdolliset etenemislentokentät
     possible_flight_locations(pelaaja["location"], pelaaja["can_advance"])
 #############################
 
+
+# Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
+def help_menu():
+    user_input_tips = {
+        'Return': 'Continue the game.',
+        'Rules': 'Display the rules of the game.',
+        'Commands': 'A guide on how to progress in the game.',
+        'Exit': 'Exits the game. Always available.',
+    }
+    print("\n------------------------------\n"
+          "Quick commands: \n")
+    for i, i2 in user_input_tips.items():  # prints out input tips for the user
+        print(f"{i}: {i2}")
+    help_input = input("\nPlease enter a quick command: ").lower()
+    while help_input != "exit":
+        if help_input == "return":  # exits the "instructions" loop with given user input
+            return
+        elif help_input == "rules":
+            os.system("cls")
+            print(OHJEET)
+            time.sleep(2.0)
+            input("Press Enter to continue...")
+            return help_menu()
+        elif help_input == "commands":
+            print("\nAvailable commands (all case insensitive):\n"
+                  "- To travel to available airports, type out their ICAO codes.\n"
+                  "For example, typing EFHK (when available) would take you to\n"
+                  "Helsinki-Vantaa Airport in Finland.\n"
+                  "- If you can't afford to travel, you can type out MONEY\n"
+                  "to spend one in-game round doing odd jobs to increase your funds.\n")
+            input("Type Enter (or anything) to continue...")
+            return help_menu()
+        else:
+            print("Unknown command.")
+            help_input = input("\nPlease enter a quick command: ").lower()
+    else:
+        exit()
+
+
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktion.
-
-
 def game_start():
     # Destinations = [], emissions = int, trip_price = int
     (destinations, emissions, trip_price) = generate_rotta()
@@ -372,193 +442,19 @@ while not kirjautunut:
 time.sleep(1.0)
 #############################
 
-print("\n\nYour first tip for your next destination is:")
-print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"\n')
+# print("\n\nYour first tip for your next destination is:")
+# print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"\n')
 
 # main looppi
-while True:
+pelaajan_input = ""
+while pelaajan_input != "exit":
     status()
-    pelaajan_input = input("")
+    pelaajan_input = input("*\"?\" takes you to Help menu* ")
     # - pelaajan input
-
+    if pelaajan_input == "?":
+        help_menu()
+        continue
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
-
+else:
     exit()
-
-# LMAO
-
-'''
-# Palauttaa pyydetyn kolummnin arvon nykyiseltä pelaajalta. Käytä pienellä kirjoitettuja "nimiä", vaikka funktiossa onkin .lower() varmistajana
-def getColumn(column: str):
-    pointer = connection.cursor()
-    sql = f"select {column.lower()} from game where screen_name = '{currentUser}';"
-
-    pointer.execute(sql)
-    result = pointer.fetchall()
-
-    return result[0][0]
-
-
-# Käytetään arvojen päivittämiseen valitussa kolumnissa, VAROVASTI NIIDEN ARGUMENTTIEN KANSSA!
-# Column EI SAA olla: id, screen_name, passcode, location
-# SAA OLLA: co2_consumed, co2_budget, money
-def updateValue(column: str, action: str, amount: int):
-    # Ainoat käytettävät toiminnot funktiossa: Lisää, poista, aseta
-    if action not in ["add", "remove", "set"] or amount < 0:
-        print("ERROR in updateValue() function arguments.")
-        return False
-
-    currentValue = getColumn(column)
-    pointer = connection.cursor()
-    sql = f"update game set {column} = "
-
-    if action == "set":
-        # Asetetaan määrä pyydetyksi
-        sql += f"{amount} "
-    elif action == "add":
-        # Lisätään pyydetty määrä
-        sql += f"({column} + {amount}) "
-    elif action == "remove":
-        # Jos rahaa on vähemmän kuin pitäisi poistaa, laitetaan nollille. Muuten vain vähennetään.
-        sql += f"0 " if amount >= currentValue else f"({column} - {amount}) "
-
-    sql += f"where screen_name = '{currentUser}';"
-    pointer.execute(sql)
-
-    return True
-
-
-def login(username: str):
-    pointer = connection.cursor()
-    username = username.upper()
-
-    sql = "select screen_name from game "
-    sql += f"where screen_name = '{username}';"
-
-    pointer.execute(sql)
-    result = pointer.fetchall()
-
-    #########################
-    #########################
-    # Jos käyttäjänimeä ei löydy tietokannasta game -> screen_name
-    if not result:
-        print("User not found, create a new user? You can also type 'exit' to exit game. (Y = yes / N = no)")
-        loginInput = input("Y / N ").lower()
-
-        while loginInput not in ["y", "n", "exit"]:
-            loginInput = input(
-                "Invalid command, enter Y, N or exit: ").lower()
-
-        if loginInput == "exit":
-            exit()  # Ohjelma sulkeutuu
-        elif loginInput == "n":
-            return False  # EI LUODA UUTTA KÄYTTÄJÄÄ, PELI EI ETENE
-        # LUODAAN UUSI KÄYTTÄJÄ
-        elif loginInput == "y":
-            newPIN = input(
-                "Enter your new 4-digit PIN code: ")
-
-            # Jos PIN-koodi ei ole validi
-            while len(newPIN) != 4 or not newPIN.isdigit():
-                # Pitää muistaa aina päästää käyttäjä pois
-                if newPIN == "exit":
-                    exit()
-                else:
-                    newPIN = input(
-                        "Entered PIN code is invalid. Please enter a 4-number PIN code: ")
-
-            # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
-            sqlNewPIN = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
-            sqlNewPIN += f"values (0, 0, '{username}', 'EFHK', 0, {int(newPIN)});"
-
-            pointer.reset()
-            pointer.execute(sqlNewPIN)
-
-            newUser = input(
-                "User created! You can now log in: ").upper()
-
-            if newUser == "exit":
-                exit()
-
-            return login(newUser)
-    # UUDEN KÄYTTÄJÄN LUONTI LOPPUU
-    #########################
-    #########################
-    else:
-        oldUserPIN = input("Input your 4-digit PIN code: ")
-
-        # Käyttäjän pitää aina päästä ulos
-        if oldUserPIN.upper() == "exit":
-            exit()
-
-        oldUserPIN = int(oldUserPIN)
-
-        sqlOldPIN = "select screen_name, passcode from game "
-        sqlOldPIN += f"where screen_name = '{username}' and passcode = {oldUserPIN};"
-
-        pointer.execute(sqlOldPIN)
-        result = pointer.fetchall()
-
-        if not result:
-            print("Invalid username or PIN code.")
-            return False
-
-        #####################
-        #####################
-        # Onnistunut sisäänkirjautuminen!
-        if username == result[0][0] and oldUserPIN == result[0][1]:
-            print(
-                f"Login successful with {result[0][0]} and {result[0][1]}!")
-            return True
-        else:
-            print("Something went wrong with login...")
-            return False
-
-
-# Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
-def hint(icao: str):
-    pointer = connection.cursor()
-
-    sql = "select hint from hints "
-    sql += f"where ident = '{icao}';"
-
-    result = pointer.fetchall()
-
-    if not result:
-        return "ERROR fetching hint from hints!"
-    else:
-        return result[0][0]
-
-    return
-
-
-connection = mysql.connector.connect(
-    host="127.0.0.1",
-    port=3306,
-    database="velkajahti",
-    user="vj_admin",
-    password="velkajahti",
-    autocommit=True
-)
-
-print("---------------------------------")
-currentUser = input("Enter username: ").upper()
-login = login(currentUser)
-
-if not login:
-    print("Exiting game.")
-    exit()
-
-collu = input("What column to alter? ").lower()
-muny = input("Add / Remove / Set? ").lower()
-amount = input("Enter amount: ")
-
-if "exit" in [collu, muny, amount]:
-    print("Exiting game.")
-    exit()
-
-print(getColumn(collu))
-updateValue(collu, muny, int(amount))
-print(getColumn(collu))
-'''
