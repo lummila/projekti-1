@@ -258,16 +258,12 @@ def generate_rotta():
     return (output, math.floor(total_grams), math.floor(total_price))
 
 
-def sql_country_query(icao):
-    sql = "select country.name from country "
-    sql += "where country.iso_country in ("  # Fancy sulkuhaku
-    sql += "select airport.iso_country from airport "
-    sql += f"where ident = '{icao}');"
+def sql_destination(icao):
+    sql = "select airport.name, country.name, airport.ident from country, airport "
+    sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    pointer = connection.cursor()
-    pointer.execute(sql)
-    result = pointer.fetchall()
+    pointer, result = sql_execute(sql)
 
     if pointer.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
@@ -275,7 +271,7 @@ def sql_country_query(icao):
     else:
         # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
         # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
-        return result[0][0]
+        return f"{result[0][0]}, {result[0][1]}\t({result[0][2]})"
 
 
 def sql_coordinate_query(start, dest):
@@ -310,6 +306,7 @@ def hint(icao: str):
     sql = "select hint from hints "
     sql += f"where ident = '{icao}';"
 
+    pointer.execute(sql)
     result = pointer.fetchall()
 
     if not result:
@@ -327,11 +324,31 @@ def check_for_dist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
+def possible_flight_locations(current_location):
+    location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
+
+    print("Possible flight locations (type the 4-letter code to travel to said airport):")
+    if (location - 10) < 0:
+        for x in range(11, 16):
+            print(sql_destination(DEST_ICAO[x]))
+    elif 0 < (location - 10) < 10:
+        for x in range(21, 26):
+            print(sql_destination(DEST_ICAO[x]))
+
+    return
+
+
+# Printtaa pelaajalle tilanteen
+
+
 def status():
-    return print(
-        f"Current location: {sql_country_query(pelaaja['location'])}\t"
+    print(
+        f"Current location: {sql_destination(pelaaja['location'])}\t"
         f"Current money: {pelaaja['money']}\t"
         f"Current round (out of 10): {pelaaja['round']}")
+
+    possible_flight_locations(pelaaja["location"])
+    return
 
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros.
@@ -354,7 +371,7 @@ def game_start():
         "round": 0
     }
 
-    return (rottagame, player_create)
+    return rottagame, player_create
 
 
 # --------------------------------------
@@ -374,7 +391,7 @@ connection = mysql.connector.connect(
     autocommit=True
 )
 #############################
-
+possible_flight_locations("ESSA")
 #############################
 # Ohjeet
 esittele_ohjeet = input(
@@ -395,15 +412,16 @@ while not kirjautunut:
 #############################
 
 # Pelaajan ja rotan init:
-(ROTTA, pelaaja) = game_start()
+ROTTA, pelaaja = game_start()
 
 print("Your first tip for your next destination is:")
-print(hint(DEST_ICAO[ROTTA['destinations'][1]]))
+print(hint(DEST_ICAO[ROTTA["destinations"][1]]))
 # main looppi
 while True:
     status()
     pelaajan_input = input("")
     # - pelaajan input
+
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
 
