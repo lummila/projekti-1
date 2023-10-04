@@ -1,7 +1,11 @@
 import random
 import math
+import time
+import os
 import mysql.connector
 from geopy import distance
+
+os.system('cls')
 
 DEST_ICAO = {
     1: "EFHK",  # Helsinki
@@ -32,7 +36,7 @@ DEST_ICAO = {
     55: "GCLP",  # Gran Canaria
 }
 
-OHJEET = ("------------------------------\n"
+OHJEET = ("\n\n------------------------------\n"
           "Welcome to Chase The Rat!\n\nYou'll need to enter an existing username "
           "and a PIN-code to play with your user\n"
           "OR if you are a new player you can create your own username and a four-digit PIN-code.\n\n"
@@ -59,8 +63,8 @@ OHJEET = ("------------------------------\n"
           "\n\nIf you reach the final destination where the rat is within the given rounds: You'll win."
           "\n\nAfter reaching the goal the game will calculate your final points by summing up "
           "\nhow many rounds you used, your emissions and the money that's left."
-          "\n\nIf you don't find The rat within the ten rounds: you'll lose."
-          "------------------------------")
+          "\n\nIf you don't find The rat within the ten rounds: you'll lose.\n"
+          "------------------------------\n\n")
 
 # exit()
 
@@ -215,8 +219,6 @@ def login(username: str):
 
 # Lentokentälle saapuminen -funktio
 
-# Ohjeet-funktio
-
 
 def generate_rotta():
     # ROTAN KOHTEET
@@ -271,7 +273,7 @@ def sql_destination(icao):
     else:
         # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
         # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
-        return f"{result[0][0]}, {result[0][1]}\t({result[0][2]})"
+        return f"({result[0][2]}) {result[0][0]}, {result[0][1]}"
 
 
 def sql_coordinate_query(start, dest):
@@ -324,6 +326,7 @@ def check_for_dist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
+# Hakee SQL:stä listan mahdollisia lentokohteita ja printtaa ne pelaajalle luettavaksi.
 def possible_flight_locations(current_location):
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
 
@@ -339,13 +342,12 @@ def possible_flight_locations(current_location):
 
 
 # Printtaa pelaajalle tilanteen
-
-
 def status():
-    print(
-        f"Current location: {sql_destination(pelaaja['location'])}\t"
-        f"Current money: {pelaaja['money']}\t"
-        f"Current round (out of 10): {pelaaja['round']}")
+    print("\n------------------------------\n"
+          f"Location: {sql_destination(pelaaja['location'])}\n"
+          f"Money: {pelaaja['money']}\n"
+          f"Round: {pelaaja['round']}/10\n"
+          "------------------------------\n")
 
     possible_flight_locations(pelaaja["location"])
     return
@@ -409,13 +411,15 @@ pelaaja_nimi = ""
 kirjautunut = login(input("Please enter your username to log in: "))
 while not kirjautunut:
     kirjautunut = login(input("Please enter your username to log in: "))
+time.sleep(1.0)
 #############################
 
 # Pelaajan ja rotan init:
 ROTTA, pelaaja = game_start()
 
-print("Your first tip for your next destination is:")
-print(hint(DEST_ICAO[ROTTA["destinations"][1]]))
+print("\n\nYour first tip for your next destination is:")
+print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"')
+
 # main looppi
 while True:
     status()
