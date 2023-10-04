@@ -42,42 +42,37 @@ def main_core(current_stage, rounds_left):
 def game_instructions():
     return f""
 '''
-user_command = "?"
-def user_needs_help(user_command):  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
+
+pelaajan_input = input("Provide a command: ")
+
+
+def user_needs_help(pelaajan_input):  #  Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
     user_input_tips = {
-        'Exit: ': 'Exit the help module.',
+        'Return: ': 'Continue the game',
         'Status: ': 'Show current score and available data.'
-    }
+        }
+    print("Quick commands: \n")
+    for i, i2 in user_input_tips.items():  # prints out input tips for the user
+        print(f"{i}, {i2}")
     while True:
-        global user_input
-        if user_command == "?":
-            user_input = input("Please enter a command, ? or exit to leave the help module: ")
-            if user_input == "?":
-                print("Quick commands:")
-                for i, i2 in user_input_tips.items():  #  prints out input tips for the user
-                    print(f"{i}, {i2}")
-            elif user_input.lower() == "exit":  #  exits the "instructions" loop with given user input
-                return False
-            elif user_input.lower() == "status":  #  provides the user the current game status and progress
-                pointer = connection.cursor()
-                sql = (f"SELECT Points, Co2_consumed, Co2_budget, Money, Location "
-                       f"FROM goal, game WHERE Screen_name = {'USERNAME HERE'}") #  missing correct variables/locations
-                pointer.execute(sql)
-                result = pointer.fetchall()
-                return f'{result}'
-            else:
-                print("Unknown command")
-                user_input = input("Please enter a command, ? or exit to leave the help module: ")
-
-# a bit rough on the edges
-
-user_needs_help(user_command)
+        help_input = input("Please enter a quick command: ")
+        if help_input.lower() == "return":  #  exits the "instructions" loop with given user input
+            return False
+        elif help_input.lower() == "status":  #  provides the user important stats and game progress
+            print("status()")
+        else:
+            print("Unknown command\n")
 
 
-player_name = "Karri"
-player_level = 0
+if pelaajan_input == "?":
+    user_needs_help(pelaajan_input)
+print("test")
+
+#  pääloooooooppi
 
 
+
+''''
 def player_stage_up():
     global player_level  #  "global" keyword gains access to a global variable inside a function
     player_level += 1
@@ -86,8 +81,66 @@ def player_stage_up():
 def rounds_left_decreasing():  #  decreases the amount of rounds the user has left to use
     global rounds_left
     rounds_left -= 1
-    return f"{rounds_left}"
+    return f"Rounds left: {rounds_left}"
+'''
 
+current_round = 1
+round_limit = 10
+
+#  pääloooooooppi
+
+
+def main_game_loop():
+    #  declaring needed valuables, except we'll be using functions returning values
+    player_location = "EFHK"
+    rounds_left = 10
+    stage = 0
+
+    print(f"You're at EFHK airport, follow the damn train CJ and chase the rat or you lose your money!")
+
+    while rounds_left > 0:
+        print(f"\nStage {stage}")
+        print(f"Current Location: {player_location}")
+        print(f"Rounds Left: {rounds_left}")
+
+        if stage == 1:
+            available_airports = []
+        elif stage == 2:
+            available_airports = []
+        elif stage == 3:
+            available_airports = []
+        elif stage == 4:
+            available_airports = []
+        elif stage == 5:
+            available_airports = []
+
+            # Ask the player for their choice
+        choice = input("Do you want to fly or stay and earn money? Enter F/S: ").strip().lower()
+
+        if choice == "f":  # The player chooses to fly
+            destination = input("Enter the ICAO code of the airport you want to fly to: ").strip().upper()
+            #  checks if the user provided ICAO is found in the corresponding list of airports
+            if destination in available_airports:
+                player_location = destination
+                rounds_left -= 1
+                stage += 1
+                print(f"You have arrived at {destination}!")
+            else:
+                print("Invalid ICAO code. Choose an available airport.")
+        elif choice == "s":
+            # The player chooses to stay and earn money
+            rounds_left -= 1
+            print("You decided to stay at the airport and earn money.")
+        else:
+            print("Invalid choice. Choose 'F' to Fly or 'S' to Stay.")
+
+        # Check if the player has reached the final stage and caught the rat
+        if stage == 6:
+            print("Congratulations! You caught the guy and got your money back!")
+            break
+    #  player runs out of rounds (10 at the start)
+    if rounds_left == 0:
+        print("You ran out of rounds. The rat got away. Game over!")
 
 
 
