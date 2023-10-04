@@ -391,7 +391,7 @@ connection = mysql.connector.connect(
     autocommit=True
 )
 #############################
-possible_flight_locations("ESSA")
+
 #############################
 # Ohjeet
 esittele_ohjeet = input(
