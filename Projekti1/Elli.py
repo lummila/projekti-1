@@ -92,15 +92,23 @@ negative_coincidences = [{'coincidence': "The airport lost your luggage... "
                          {'coincidence': "You did not get a coincidence."}
                          ]
 
-random_positive_coincidence = draw_positive_coincidence(
-    positive_coincidences, negative_coincidences)
-print(f"{random_positive_coincidence['coincidence']}")
-
-random_negative_coincidence = draw_negative_coincidence(
-    negative_coincidences, positive_coincidences)
-print(f"{random_negative_coincidence['coincidence']}")
 
 # when the coincidences come in use
+def coincidence():
+    if location == rotta_destination:
+        random_positive_coincidence = draw_positive_coincidence(positive_coincidences, negative_coincidences)
+        print(f"{random_positive_coincidence['coincidence']}")
+    elif location != rotta_destination:
+        random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
+        print(f"{random_negative_coincidence['coincidence']}")
+    return
+
+
+
+
+
+
+
 OHJEET = ("Welcome to Chase The Rat!\n\nYou'll need to enter an existing username "
           "and a PIN-code to play with your user\n"
           "OR if you are a new player you can create your own username and a four-digit PIN-code.\n\n"
@@ -133,3 +141,4 @@ print(OHJEET)
 print("-------------------------")
 
 exit()
+
