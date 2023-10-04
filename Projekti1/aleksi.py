@@ -214,9 +214,9 @@ def sql_destination(icao: str):
     sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    pointer, result = sql_execute(sql)
+    cursor, result = sql_execute(sql)
 
-    if pointer.rowcount <= 0:  # Ei tuloksia
+    if cursor.rowcount <= 0:  # Ei tuloksia
         print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
         return -1
     else:
@@ -227,7 +227,6 @@ def sql_destination(icao: str):
 
 def sql_coordinate_query(start: str, dest: str):
     location_list = []
-    pointer = connection.cursor()
 
     # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
     for x in range(2):
@@ -236,12 +235,10 @@ def sql_coordinate_query(start: str, dest: str):
         sql += f"where ident = '{start if x == 0 else dest}';"
 
         # SQL:n käyttö
-        pointer.reset()
-        pointer.execute(sql)
-        result = pointer.fetchall()
+        cursor, result = sql_execute(sql)
 
-        if pointer.rowcount <= 0:
-            print("Jokin meni vikaan, tarkista lähtökenttäsi ja kohteesi.")
+        if cursor.rowcount <= 0:
+            print("ERROR calculating coordinates in sql_coordinate_query()")
             return -1
         else:
             # Lisätään locationList-listaan tuple, jossa koordinaatit
@@ -252,13 +249,10 @@ def sql_coordinate_query(start: str, dest: str):
 
 # Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
 def hint(icao: str):
-    pointer = connection.cursor()
-
     sql = "select hint from hints "
     sql += f"where ident = '{icao}';"
 
-    pointer.execute(sql)
-    result = pointer.fetchall()
+    _, result = sql_execute(sql)
 
     if not result:
         return "ERROR fetching hint from hints!"
@@ -336,7 +330,8 @@ def status():
 
     # Printtaa pelaajan tämänhetkisen vihjeen
     print(
-        f'Rumour for the Rat\'s next destination:\n"{display_hint(pelaaja["location"])}"\n')
+        "Rumour for the Rat's next destination:\n" + "\x1B[3m" +
+        f'"{display_hint(pelaaja["location"])}"' + "\x1B[0m" + "\n")
 
     # Listaa pelaajalle mahdolliset etenemislentokentät
     possible_flight_locations(pelaaja["location"], pelaaja["can_advance"])
@@ -451,7 +446,8 @@ time.sleep(1.0)
 # print(f'"{hint(DEST_ICAO[ROTTA["destinations"][1]])}"\n')
 
 # main looppi
-while True:
+pelaajan_input = ""
+while pelaajan_input != "exit":
     status()
     pelaajan_input = input("*\"?\" takes you to Help menu* ")
     # - pelaajan input
@@ -460,5 +456,5 @@ while True:
         continue
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
-
+else:
     exit()
