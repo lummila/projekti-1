@@ -113,23 +113,23 @@ player_create = {
 
 # pelaajan arvojen muuttamisfunktio
 def change_of_status():
-    if positive_coincidences:
-        if 'coincidence'[0]:
-            player_create['money'] = 'money' + 100
-        elif 'coincidence'[1]:
+    if POS_COINCIDENCES:
+        if [0]:
+            player_create['money'] = + 100
+        elif [1]:
             player_create['money'] = 'money' + 50
-        elif 'coincidence'[2]:
+        elif [2]:
             player_create['money'] = 'money' + 80
-        elif 'coincidence'[3][4]:
+        elif [3][4]:
             player_create['emissions'] = 'emissions' - 10000
-    if negative_coincidences:
-        if 'coincidence'[0][1]:
+    if NEG_COINCIDENCES:
+        if [0][1]:
             player_create['round'] = 'round' + 1
-        elif 'coincidence' [2]:
+        elif [2]:
             player_create['money'] = 'money' - 100
-        elif 'coincidence'[3]:
+        elif [3]:
             player_create['money'] = 'money' - 50
-        elif 'coincidence'[4]:
+        elif [4]:
             player_create['emissions'] = 'emissions' + 10000
     else:
         'no coincidence'
