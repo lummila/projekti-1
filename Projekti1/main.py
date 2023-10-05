@@ -283,8 +283,6 @@ def hint(icao: str):
     else:
         return result[0][0]
 
-    return
-
 
 # Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
 def check_for_dist(locs, emissions: bool):
@@ -501,7 +499,6 @@ while pelaajan_input != "exit":
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
-        continue
     elif pelaajan_input == "fly":
         # LENTOFUNKTIO
         continue
