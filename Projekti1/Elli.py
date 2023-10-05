@@ -45,8 +45,7 @@ import random
 # coincidence functions
 
 # when the player gets to the right location
-def draw_coincidence(positive_or_negative):
-    if
+def draw_positive_coincidence(positive_coincidences, negative_coincidences):
     positive_probability = 80
     coincidences_list = random.choices([positive_coincidences, negative_coincidences],
                                        weights=[80, 20])
@@ -60,7 +59,7 @@ def draw_negative_coincidence(negative_coincidences, positive_coincidences):
     negative_probability = 80
     coincidences_list = random.choices([negative_coincidences, positive_coincidences],
                                        weights=[80, 20])
-    random_coincidence = random.choice(coincidences_list)
+    random_coincidence = random.choice(coincidences_list[0])
     return random_coincidence
 
 
@@ -71,7 +70,7 @@ positive_coincidences = [{'coincidence': "Nice! You found a 100€ bill on the a
                                          "50e will be added to your account"},
                          {'coincidence': "Lucky you! The flight company made a mistake with your tickets. "
                                          "You'll be getting 80€ cashback! 80e will be added to your account"},
-                         {'coincidence': "There was a free seat at a more eco-friendly airplane. "
+                         {'coincidence': "There was a free seat at a more eco-friendly airplane."
                                          "10kg was removed from your emissions!"},
                          {'coincidence': "The airplane took a shorter route. Emissions were 10kg less than expected. "
                                          "10kg of emissions will be removed."},
@@ -95,17 +94,14 @@ negative_coincidences = [{'coincidence': "The airport lost your luggage... "
 
 
 # when the coincidences come in use
-# def coincidence():
-# if location == ROTTA:
-random_positive_coincidence = draw_positive_coincidence(positive_coincidences, negative_coincidences)
-print(f"{random_positive_coincidence['coincidence']}")
-
-
-
-elif location != ROTTA:
-random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
-print(f"{random_negative_coincidence['coincidence']}")
-return
+def coincidence():
+    if location == ROTTA:
+        random_positive_coincidence = draw_positive_coincidence(positive_coincidences, negative_coincidences)
+        print(f"{random_positive_coincidence['coincidence']}")
+    elif location != ROTTA:
+        random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
+        print(f"{random_negative_coincidence['coincidence']}")
+    return
 
 
 player_create = {
@@ -171,6 +167,3 @@ print(OHJEET)
 print("-------------------------")
 
 exit()
-
-
-
