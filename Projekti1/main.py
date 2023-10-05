@@ -496,11 +496,16 @@ time.sleep(1.0)
 pelaajan_input = ""
 while pelaajan_input != "exit":
     status()
-    pelaajan_input = input("\n*\"?\" takes you to Help menu* ")
+    pelaajan_input = input(
+        "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower()
     # - pelaajan input
     if pelaajan_input == "?":
         help_menu()
         continue
+    elif pelaajan_input == "fly":
+        # LENTOFUNKTIO
+        continue
+
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
 else:
