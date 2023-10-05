@@ -71,7 +71,7 @@ POS_COINCIDENCES = [
     "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n50e will be added to your account",
     "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n80e will be added to your account",
     "There was a free seat at a more eco-friendly airplane.\n10kg was removed from your emissions!", "The airplane took a shorter route. Emissions were 10kg less than expected.\n10kg of emissions will be removed.",
-    "Nothing of note happened."
+    "Nothing of note has happened."
 ]
 
 NEG_COINCIDENCES = [
@@ -80,8 +80,13 @@ NEG_COINCIDENCES = [
     "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n100e will be removed from your account",
     "Your luggage was over weight. The fee for extra kilos is 50 €.\n50 € will be removed from your account",
     "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n10kg of emissions will be added",
-    "Nothing of note happened."
+    "Nothing of note has happened."
 ]
+
+
+def clear():
+    return os.system('cls')
+
 
 # Lyhennys sql:n kanssa kommunikoinnissa
 
@@ -138,7 +143,8 @@ def login(username: str):
             sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
             sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
 
-            cursor.reset().execute(sql_new_user)
+            cursor.reset()
+            cursor.execute(sql_new_user)
 
             new_user = input(
                 "User created! You can now log in: ").upper()
@@ -285,7 +291,15 @@ def check_for_dist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
-def display_hint(current_location: str):
+def trip_price(start, dest):
+    coords = sql_coordinate_query(start, dest)
+    trip = check_for_dist(coords, False)
+    price = 100
+    price += trip / 10
+    return math.floor(price)
+
+
+def display_hint(current_location: str, can_advance: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
     hint_index = 0
@@ -302,6 +316,9 @@ def display_hint(current_location: str):
         hint_index = 5
     else:
         hint_index = 6
+
+    if not can_advance:
+        hint_index -= 1
 
     return hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
 
@@ -351,20 +368,24 @@ def possible_flight_locations(current_location: str, can_advance: bool, prints: 
 
 # Printtaa pelaajalle tilanteen, ei palauta mitään
 def status():
-    os.system("cls")
+    clear()
 
     # Printtaa pelaajan sijainnin (flygari, maa, ICAO-koodi), rahat ja kierroksen/10
     loc = sql_destination(pelaaja['location'])
     print("------------------------------\n"
           f"Location: ({loc[0]}) {loc[1]}, {loc[2]}\n"
-          f"Money: {pelaaja['money']} €\n"
+          f"Money: " + "{:,}".format(pelaaja['money']) + " €\n"
+          "CO2 Emissions: " + "{:,}".format(pelaaja['emissions']) + " g\n"
           f"Round: {pelaaja['round']}/10\n"
           "------------------------------\n")
+
+    # Mahdollinen edellisen kierroksen sattuma
+    print(f"{pelaaja['coincidence']}\n")
 
     # Printtaa pelaajan tämänhetkisen vihjeen
     print(
         "Rumour for the Rat's next destination:\n" + "\x1B[3m" +
-        f'"{display_hint(pelaaja["location"])}"' + "\x1B[0m" + "\n")
+        f'"{display_hint(pelaaja["location"], pelaaja["can_advance"])}"' + "\x1B[0m" + "\n")
 
     # Listaa pelaajalle mahdolliset
     print("Possible flight locations:")
@@ -390,10 +411,12 @@ def help_menu():
         if help_input == "return":  # exits the "instructions" loop with given user input
             return
         elif help_input == "rules":
-            os.system("cls")
+            clear()
             print(OHJEET)
             time.sleep(2.0)
             input("Press Enter to continue...")
+            clear()
+            status()
             return help_menu()
         elif help_input == "commands":
             print("\nAvailable commands (all case insensitive):\n"
@@ -403,6 +426,8 @@ def help_menu():
                   "- If you can't afford to travel, you can type out MONEY\n"
                   "to spend one in-game round doing odd jobs to increase your funds.\n")
             input("Type Enter (or anything) to continue...")
+            clear()
+            status()
             return help_menu()
         else:
             print("Unknown command.")
@@ -415,11 +440,10 @@ def coincidence(positive: bool):
     weights = [80, 20] if positive else [20, 80]
     coincidences_list = random.choices([POS_COINCIDENCES, NEG_COINCIDENCES],
                                        weights=weights)
-    choice = random.choice(coincidences_list)
+    choice = random.choice(coincidences_list[0])
 
     for index, text in enumerate(POS_COINCIDENCES):
         if choice == text:
-            print(choice)
             if index == 0:
                 pelaaja["money"] += 100
             elif index == 1:
@@ -433,7 +457,6 @@ def coincidence(positive: bool):
                     pelaaja["emissions"] = 0
     for index, text in enumerate(NEG_COINCIDENCES):
         if choice == text:
-            print(choice)
             if index in [0, 1]:
                 pelaaja["round"] += 1
             elif index == 2:
@@ -448,6 +471,80 @@ def coincidence(positive: bool):
                     pelaaja["money"] = 0
             elif index == 4:
                 pelaaja["emissions"] += 10000
+    return choice
+
+
+def travel_loop():  # THE main loop
+    while True:
+        clear()
+        status()
+        print("\nType '?' to open Help menu, 'return' to return, 'exit' to exit.")
+        icao = input("\nWhere do you wish to fly?: ").strip().upper()
+        if icao == "?":
+            help_menu()
+        elif icao == "EXIT":
+            exit()
+        elif icao == "RETURN":
+            return
+
+        icao_index = [i for i in DEST_ICAO if DEST_ICAO[i] == icao][0]
+
+        if icao == pelaaja["location"]:
+            print("You're already in this location...")
+            time.sleep(4.0)
+            continue
+
+        if icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index in ROTTA["destinations"]:
+
+            price = trip_price(pelaaja["location"], icao)
+
+            if pelaaja["money"] < price:
+                print("\nYou cannot afford this flight...")
+                time.sleep(4.0)
+                continue
+
+            emissions = math.floor(check_for_dist(
+                sql_coordinate_query(pelaaja["location"], icao), True))
+
+            dest = sql_destination(icao)
+            print(
+                f"You have travelled to the correct airport: {dest[1]}.")
+
+            pelaaja["money"] -= price
+            pelaaja["round"] += 1
+            pelaaja["can_advance"] = True
+            pelaaja["coincidence"] = coincidence(True)
+            pelaaja["emissions"] += emissions
+
+            time.sleep(4.0)
+            return icao
+
+        elif icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index not in ROTTA["destinations"]:
+
+            price = trip_price(pelaaja["location"], icao)
+
+            if pelaaja["money"] < price:
+                print("\nYou cannot afford this flight...")
+                time.sleep(4.0)
+                continue
+
+            emissions = math.floor(check_for_dist(
+                sql_coordinate_query(pelaaja["location"], icao), True))
+
+            print(
+                f"You travelled to the wrong airport: {sql_destination(icao)[1]}...")
+
+            pelaaja["money"] -= price
+            pelaaja["round"] += 1
+            pelaaja["can_advance"] = False
+            pelaaja["coincidence"] = coincidence(False)
+            pelaaja["emissions"] += emissions
+
+            time.sleep(4.0)
+            return icao
+        else:
+            print("\nInvalid input, please try again.")
+            time.sleep(2.0)
 
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
@@ -468,8 +565,9 @@ def game_start():
         "location": "EFHK",
         "money": 1000,
         "emissions": 0,
-        "round": 0,
-        "can_advance": True
+        "round": 1,
+        "can_advance": True,
+        "coincidence": "Nothing of note has happened."
     }
 
     return rotta_create, player_create
@@ -502,6 +600,7 @@ if esittele_ohjeet == "exit":
 # Ohjeiden selitys
 elif esittele_ohjeet == "y":
     print(OHJEET)
+    input("Press Enter to continue...")
 #############################
 
 # Pelaajan (tätä tarvitaan siihen, että kirjautuneen pelaajan nimi talletetaan ["name"]-osioon) ja rotan init:
@@ -529,10 +628,12 @@ while pelaajan_input != "exit":
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
     elif pelaajan_input == "fly":
-        # LENTOFUNKTIO
-        continue
+        travel = travel_loop()
+        if travel:
+            pelaaja["location"] = travel
 
     # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
+
 else:
     exit()

@@ -265,7 +265,7 @@ def checkForPrice(coords):
     trip = float(distance.distance(coords[0], coords[1]).km)
     price = 100
     price += trip / 10
-    return round(price, 2)
+    return math.floor(price)
 
 
 # SQL-yhteyden luominen tietokannan käyttöä varten
