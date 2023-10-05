@@ -75,18 +75,12 @@ POS_COINCIDENCES = [
 ]
 
 NEG_COINCIDENCES = [
-    "The airport lost your luggage... You'll have to wait one night at the airport.\One turn is used",
-    {'coincidence': "Your flight was canceled, because of a raging storm. "
-     "Your replacing flight leaves tomorrow morning. One turn is used"},
-    {'coincidence': "You checked-in late to your flight. "
-     "You'll have to pay a 100€ fee for the manual check-in. "
-     "100e will be removed from your account"},
-    {'coincidence': "Your luggage was over weight. The fee for extra kilos is 50€. "
-     "50e will be removed from your account"},
-    {'coincidence': "The aircraft underestimated the flight's emissions. "
-     "The emissions were 10kg higher than expected. "
-     "10kg of emissions will be added"},
-    {'coincidence': "You did not get a coincidence."}
+    "The airport lost your luggage... You'll have to wait one night at the airport.\nOne turn is used",
+    "Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning. \nOne turn is used",
+    "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n100e will be removed from your account",
+    "Your luggage was over weight. The fee for extra kilos is 50 €.\n50 € will be removed from your account",
+    "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n10kg of emissions will be added",
+    "Nothing of note happened."
 ]
 
 # Lyhennys sql:n kanssa kommunikoinnissa
@@ -246,7 +240,7 @@ def sql_destination(icao: str):
     else:
         # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
         # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
-        return f"({result[0][2]}) {result[0][0]}, {result[0][1]}"
+        return [result[0][2], result[0][0], result[0][1]]
 
 
 def sql_coordinate_query(start: str, dest: str):
@@ -321,31 +315,35 @@ def possible_flight_locations(current_location: str, can_advance: bool, prints: 
 
     list_of_locations = []
 
-    print("Possible flight locations (type the 4-letter code to travel to said airport):")
     if possible_loc < 0:
         for x in range(11, 16):  # Printtaa DEST_ICAOn numeroiden mukaan
             if prints:
-                print(sql_destination(DEST_ICAO[x]))
+                loc = sql_destination(DEST_ICAO[x])
+                print(f"({loc[0]}) {loc[1]}, {loc[2]}")
             list_of_locations.append(DEST_ICAO[x])
     elif 0 < possible_loc < 10:
         for x in range(21, 26):
             if prints:
-                print(sql_destination(DEST_ICAO[x]))
+                loc = sql_destination(DEST_ICAO[x])
+                print(f"({loc[0]}) {loc[1]}, {loc[2]}")
             list_of_locations.append(DEST_ICAO[x])
     elif 10 < possible_loc < 20:
         for x in range(31, 36):
             if prints:
-                print(sql_destination(DEST_ICAO[x]))
+                loc = sql_destination(DEST_ICAO[x])
+                print(f"({loc[0]}) {loc[1]}, {loc[2]}")
             list_of_locations.append(DEST_ICAO[x])
     elif 20 < possible_loc < 30:
         for x in range(41, 46):
             if prints:
-                print(sql_destination(DEST_ICAO[x]))
+                loc = sql_destination(DEST_ICAO[x])
+                print(f"({loc[0]}) {loc[1]}, {loc[2]}")
             list_of_locations.append(DEST_ICAO[x])
     else:
         for x in range(51, 56):
             if prints:
-                print(sql_destination(DEST_ICAO[x]))
+                loc = sql_destination(DEST_ICAO[x])
+                print(f"({loc[0]}) {loc[1]}, {loc[2]}")
             list_of_locations.append(DEST_ICAO[x])
 
     return list_of_locations
@@ -356,8 +354,9 @@ def status():
     os.system("cls")
 
     # Printtaa pelaajan sijainnin (flygari, maa, ICAO-koodi), rahat ja kierroksen/10
+    loc = sql_destination(pelaaja['location'])
     print("------------------------------\n"
-          f"Location: {sql_destination(pelaaja['location'])}\n"
+          f"Location: ({loc[0]}) {loc[1]}, {loc[2]}\n"
           f"Money: {pelaaja['money']} €\n"
           f"Round: {pelaaja['round']}/10\n"
           "------------------------------\n")
@@ -367,7 +366,8 @@ def status():
         "Rumour for the Rat's next destination:\n" + "\x1B[3m" +
         f'"{display_hint(pelaaja["location"])}"' + "\x1B[0m" + "\n")
 
-    # Listaa pelaajalle mahdolliset etenemislentokentät
+    # Listaa pelaajalle mahdolliset
+    print("Possible flight locations:")
     possible_flight_locations(
         pelaaja["location"], pelaaja["can_advance"], True)
 #############################
@@ -417,8 +417,37 @@ def coincidence(positive: bool):
                                        weights=weights)
     choice = random.choice(coincidences_list)
 
-    # for key, value in {POS_COINCIDENCES, NEG_COINCIDENCES}.items():
-    #     print(x)
+    for index, text in enumerate(POS_COINCIDENCES):
+        if choice == text:
+            print(choice)
+            if index == 0:
+                pelaaja["money"] += 100
+            elif index == 1:
+                pelaaja["money"] += 50
+            elif index == 2:
+                pelaaja["money"] += 80
+            elif index in [3, 4]:
+                if pelaaja["emissions"] >= 10000:
+                    pelaaja["emissions"] -= 10000
+                else:
+                    pelaaja["emissions"] = 0
+    for index, text in enumerate(NEG_COINCIDENCES):
+        if choice == text:
+            print(choice)
+            if index in [0, 1]:
+                pelaaja["round"] += 1
+            elif index == 2:
+                if pelaaja["money"] >= 100:
+                    pelaaja["money"] -= 100
+                else:
+                    pelaaja["money"] = 0
+            elif index == 3:
+                if pelaaja["money"] >= 50:
+                    pelaaja["money"] -= 50
+                else:
+                    pelaaja["money"] = 0
+            elif index == 4:
+                pelaaja["emissions"] += 10000
 
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
