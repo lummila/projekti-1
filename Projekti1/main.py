@@ -497,9 +497,9 @@ pelaajan_input = ""
 while pelaajan_input != "exit":
     status()
     pelaajan_input = input(
-        "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower()
+        "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower().strip()
     # - pelaajan input
-    if pelaajan_input == "?":
+    if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
         continue
     elif pelaajan_input == "fly":
