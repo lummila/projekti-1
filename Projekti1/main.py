@@ -66,8 +66,32 @@ OHJEET = ("\n\n------------------------------\n"
           "\n\nIf you don't find The rat within the ten rounds: you'll lose.\n"
           "------------------------------\n\n")
 
+POS_COINCIDENCES = [
+    "Nice! You found a 100€ bill on the airport floor.\n100e will be added to your account",
+    "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n50e will be added to your account",
+    "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n80e will be added to your account",
+    "There was a free seat at a more eco-friendly airplane.\n10kg was removed from your emissions!", "The airplane took a shorter route. Emissions were 10kg less than expected.\n10kg of emissions will be removed.",
+    "Nothing of note happened."
+]
+
+NEG_COINCIDENCES = [
+    "The airport lost your luggage... You'll have to wait one night at the airport.\One turn is used",
+    {'coincidence': "Your flight was canceled, because of a raging storm. "
+     "Your replacing flight leaves tomorrow morning. One turn is used"},
+    {'coincidence': "You checked-in late to your flight. "
+     "You'll have to pay a 100€ fee for the manual check-in. "
+     "100e will be removed from your account"},
+    {'coincidence': "Your luggage was over weight. The fee for extra kilos is 50€. "
+     "50e will be removed from your account"},
+    {'coincidence': "The aircraft underestimated the flight's emissions. "
+     "The emissions were 10kg higher than expected. "
+     "10kg of emissions will be added"},
+    {'coincidence': "You did not get a coincidence."}
+]
 
 # Lyhennys sql:n kanssa kommunikoinnissa
+
+
 def sql_execute(code: str):
     cursor = connection.cursor()
     cursor.execute(code)
@@ -291,30 +315,42 @@ def display_hint(current_location: str):
 
 
 # Hakee SQL:stä listan mahdollisia lentokohteita ja printtaa ne pelaajalle luettavaksi.
-def possible_flight_locations(current_location: str, can_advance: bool):
+def possible_flight_locations(current_location: str, can_advance: bool, prints: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
     # Jos pelaajalla on lupa edetä, näyttää seuraavan tason maat, jos ei, nykyiset.
     possible_loc = location - 10 if can_advance else location - 20
 
+    list_of_locations = []
+
     print("Possible flight locations (type the 4-letter code to travel to said airport):")
     if possible_loc < 0:
         for x in range(11, 16):  # Printtaa DEST_ICAOn numeroiden mukaan
-            print(sql_destination(DEST_ICAO[x]))
+            if prints:
+                print(sql_destination(DEST_ICAO[x]))
+            list_of_locations.append(DEST_ICAO[x])
     elif 0 < possible_loc < 10:
         for x in range(21, 26):
-            print(sql_destination(DEST_ICAO[x]))
+            if prints:
+                print(sql_destination(DEST_ICAO[x]))
+            list_of_locations.append(DEST_ICAO[x])
     elif 10 < possible_loc < 20:
         for x in range(31, 36):
-            print(sql_destination(DEST_ICAO[x]))
+            if prints:
+                print(sql_destination(DEST_ICAO[x]))
+            list_of_locations.append(DEST_ICAO[x])
     elif 20 < possible_loc < 30:
         for x in range(41, 46):
-            print(sql_destination(DEST_ICAO[x]))
+            if prints:
+                print(sql_destination(DEST_ICAO[x]))
+            list_of_locations.append(DEST_ICAO[x])
     else:
         for x in range(51, 56):
-            print(sql_destination(DEST_ICAO[x]))
+            if prints:
+                print(sql_destination(DEST_ICAO[x]))
+            list_of_locations.append(DEST_ICAO[x])
 
-    return
+    return list_of_locations
 
 
 # Printtaa pelaajalle tilanteen, ei palauta mitään
@@ -334,7 +370,8 @@ def status():
         f'"{display_hint(pelaaja["location"])}"' + "\x1B[0m" + "\n")
 
     # Listaa pelaajalle mahdolliset etenemislentokentät
-    possible_flight_locations(pelaaja["location"], pelaaja["can_advance"])
+    possible_flight_locations(
+        pelaaja["location"], pelaaja["can_advance"], True)
 #############################
 
 
@@ -374,6 +411,16 @@ def help_menu():
             help_input = input("\nPlease enter a quick command: ").lower()
     else:
         exit()
+
+
+def coincidence(positive: bool):
+    weights = [80, 20] if positive else [20, 80]
+    coincidences_list = random.choices([POS_COINCIDENCES, NEG_COINCIDENCES],
+                                       weights=weights)
+    choice = random.choice(coincidences_list)
+
+    # for key, value in {POS_COINCIDENCES, NEG_COINCIDENCES}.items():
+    #     print(x)
 
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
@@ -449,7 +496,7 @@ time.sleep(1.0)
 pelaajan_input = ""
 while pelaajan_input != "exit":
     status()
-    pelaajan_input = input("*\"?\" takes you to Help menu* ")
+    pelaajan_input = input("\n*\"?\" takes you to Help menu* ")
     # - pelaajan input
     if pelaajan_input == "?":
         help_menu()

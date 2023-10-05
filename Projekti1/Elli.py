@@ -45,63 +45,54 @@ import random
 # coincidence functions
 
 # when the player gets to the right location
-def draw_positive_coincidence(positive_coincidences, negative_coincidences):
-    positive_probability = 80
-    coincidences_list = random.choices([positive_coincidences, negative_coincidences],
-                                       weights=[80, 20])
-    random_coincidence = random.choice(coincidences_list[0])
-    return random_coincidence
+def coincidence(positive: bool):
+    weights = [80, 20] if positive else [20, 80]
+    coincidences_list = random.choices([POS_COINCIDENCES, NEG_COINCIDENCES],
+                                       weights=weights)
+    return random.choice(coincidences_list)
 
 
-# when the player gets to the wrong location
+POS_COINCIDENCES = [{'coincidence': "Nice! You found a 100€ bill on the airport floor. "
+                     "100e will be added to your account"},
+                    {'coincidence': "You were helpful to a lost elderly. "
+                     "For the kind act he rewarded you with a 50€ bill! "
+                     "50e will be added to your account"},
+                    {'coincidence': "Lucky you! The flight company made a mistake with your tickets. "
+                     "You'll be getting 80€ cashback! 80e will be added to your account"},
+                    {'coincidence': "There was a free seat at a more eco-friendly airplane."
+                     "10kg was removed from your emissions!"},
+                    {'coincidence': "The airplane took a shorter route. Emissions were 10kg less than expected. "
+                     "10kg of emissions will be removed."},
+                    {'coincidence': "You did not get a coincidence."}
+                    ]
 
-def draw_negative_coincidence(negative_coincidences, positive_coincidences):
-    negative_probability = 80
-    coincidences_list = random.choices([negative_coincidences, positive_coincidences],
-                                       weights=[80, 20])
-    random_coincidence = random.choice(coincidences_list[0])
-    return random_coincidence
-
-
-positive_coincidences = [{'coincidence': "Nice! You found a 100€ bill on the airport floor. "
-                                         "100e will be added to your account"},
-                         {'coincidence': "You were helpful to a lost elderly. "
-                                         "For the kind act he rewarded you with a 50€ bill! "
-                                         "50e will be added to your account"},
-                         {'coincidence': "Lucky you! The flight company made a mistake with your tickets. "
-                                         "You'll be getting 80€ cashback! 80e will be added to your account"},
-                         {'coincidence': "There was a free seat at a more eco-friendly airplane."
-                                         "10kg was removed from your emissions!"},
-                         {'coincidence': "The airplane took a shorter route. Emissions were 10kg less than expected. "
-                                         "10kg of emissions will be removed."},
-                         {'coincidence': "You did not get a coincidence."}
-                         ]
-
-negative_coincidences = [{'coincidence': "The airport lost your luggage... "
-                                         "You'll have to wait one night at the airport. One turn is used"},
-                         {'coincidence': "Your flight was canceled, because of a raging storm. "
-                                         "Your replacing flight leaves tomorrow morning. One turn is used"},
-                         {'coincidence': "You checked-in late to your flight. "
-                                         "You'll have to pay a 100€ fee for the manual check-in. "
-                                         "100e will be removed from your account"},
-                         {'coincidence': "Your luggage was over weight. The fee for extra kilos is 50€. "
-                                         "50e will be removed from your account"},
-                         {'coincidence': "The aircraft underestimated the flight's emissions. "
-                                         "The emissions were 10kg higher than expected. "
-                                         "10kg of emissions will be added"},
-                         {'coincidence': "You did not get a coincidence."}
-                         ]
+NEG_COINCIDENCES = [{'coincidence': "The airport lost your luggage... "
+                     "You'll have to wait one night at the airport. One turn is used"},
+                    {'coincidence': "Your flight was canceled, because of a raging storm. "
+                     "Your replacing flight leaves tomorrow morning. One turn is used"},
+                    {'coincidence': "You checked-in late to your flight. "
+                     "You'll have to pay a 100€ fee for the manual check-in. "
+                     "100e will be removed from your account"},
+                    {'coincidence': "Your luggage was over weight. The fee for extra kilos is 50€. "
+                     "50e will be removed from your account"},
+                    {'coincidence': "The aircraft underestimated the flight's emissions. "
+                     "The emissions were 10kg higher than expected. "
+                     "10kg of emissions will be added"},
+                    {'coincidence': "You did not get a coincidence."}
+                    ]
 
 
-# when the coincidences come in use
-def coincidence():
-    if location == ROTTA:
-        random_positive_coincidence = draw_positive_coincidence(positive_coincidences, negative_coincidences)
-        print(f"{random_positive_coincidence['coincidence']}")
-    elif location != ROTTA:
-        random_negative_coincidence = draw_negative_coincidence(negative_coincidences, positive_coincidences)
-        print(f"{random_negative_coincidence['coincidence']}")
-    return
+# # when the coincidences come in use
+# def coincidence():
+#     if location == ROTTA:
+#         random_positive_coincidence = draw_positive_coincidence(
+#             positive_coincidences, negative_coincidences)
+#         print(f"{random_positive_coincidence['coincidence']}")
+#     elif location != ROTTA:
+#         random_negative_coincidence = draw_negative_coincidence(
+#             negative_coincidences, positive_coincidences)
+#         print(f"{random_negative_coincidence['coincidence']}")
+#     return
 
 
 player_create = {
@@ -113,7 +104,7 @@ player_create = {
 
 # pelaajan arvojen muuttamisfunktio
 def change_of_status():
-    if positive_coincidences:
+    if POS_COINCIDENCES:
         if 'coincidence'[0]:
             player_create['money'] = 'money' + 100
         elif 'coincidence'[1]:
@@ -122,7 +113,7 @@ def change_of_status():
             player_create['money'] = 'money' + 80
         elif 'coincidence'[3][4]:
             player_create['emissions'] = 'emissions' - 10000
-    if negative_coincidences:
+    if NEG_COINCIDENCES:
         if 'coincidence'[0][1]:
             player_create['round'] = 'round' + 1
         elif 'coincidence' [2]:
