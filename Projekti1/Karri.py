@@ -5,8 +5,10 @@ import mysql.connector
 user_command = ""
 current_stage = 0  #  final stage = 5
 rounds_left = 10  #  player can run out of rounds (0... pretty obvious)
+import os
+import time
 
-quick_guide = ("\n\n------------------------\n"
+quick_guide = ("\n\n------------------------------------------------------------------------------------------------\n"
                "You have a 10 round limit. You can check how many rounds you"
                " have left through 'status'.\n\n"
                "When chasing the rat, you will be able to choose\nwhether to fly"
@@ -14,7 +16,7 @@ quick_guide = ("\n\n------------------------\n"
                " \nEvery single flight or a stay costs ONE round.\n\n"
                "Reach the rat by unravelling clues within the round limit"
                " and win the game!\n"
-               "------------------------\n\n")
+               "------------------------------------------------------------------------------------------------\n\n")
 
 '''
 
@@ -79,6 +81,7 @@ def user_needs_help(pelaajan_input):  #  Provides the user a quick guide during 
 
 if pelaajan_input == "?":
     user_needs_help(pelaajan_input)
+
 print("test")
 
 #  pääloooooooppi
@@ -157,53 +160,49 @@ def main_game_loop():
 '''
 
 
-def main_game_loop():
-    player_money_left = 1000
-    current_stage = 0
-    current_airport_icao = "EFHK"
-    rounds_left = 10
+def clear():
+    return os.system('cls')
 
-    while current_stage < 5:
-        stage = stage[current_stage]
-        hint = "hint function here"
-        correct_airport_icao = stage["correct_airport_icao"]
-        airport_icao_options = stage["airport_icao_options"]
+def travel_loop(possible_flight_locations): # THE main loop
 
-        print(f"\nStage {current_stage + 1}: {hint}")
-        print(f"Current Airport: {current_airport_icao}")
-        print(f"Player Coins: {player_money_left}")
-
-        pelaajan_input = input("Enter an ICAO code or 'S' to earn more money: ").strip().upper()
-
-        if pelaajan_input == "S":
-            print("You stayed at the airport. You earned 100 credits but it cost you one round!")
-            player_money_left += 100
-            rounds_left -= 1
-
-        if player_money_left <= 0:
-            print("Out of money! Get lost! lol")
-            break
-
-        elif pelaajan_input == correct_airport_icao:
-            current_stage += 1
-            player_money_left -= 100
-            current_airport_icao = pelaajan_input
-
-        elif pelaajan_input in airport_icao_options and pelaajan_input != correct_airport_icao:
-            current_airport_icao = pelaajan_input
-            print(f"Rat wasn't here! You are now at {current_airport_icao}.")
-            rounds_left -= 1
-            player_money_left -= 100
-            print(f"You flew to the wrong airport. The rat had been to {correct_airport_icao}.")
-            current_airport_icao = correct_airport_icao
-            print(f"You've been transferred to the correct airport: {current_airport_icao}")
-            rounds_left -= 1
-
-        elif rounds_left == 0:
-            print("You ran out of rounds. YOU LOSE!!!")
+    while True:
+        clear()
+        status()
+        icao = input("Where do you wish to fly?: ").strip().upper()
+        if icao == "?":
+            help_menu()
+        elif icao == "EXIT":
             exit()
+        if icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao in ROTTA["destinations"]:
+            print(f"You have travelled to the correct airport: {sql_destination(icao)[1]}.")
+            coincidence(True)
+            return icao
+        elif icao in possible_flight_locations(pelaaja("location"), pelaaja("can_advance"), False) and icao not in ROTTA["destinations"]:
+            print(f"You travelled to the wrong airport: {sql_destination(icao)[1]}")
+            coincidence(False)
+            return icao
+        else:
+            print("Invalid input, please try again.")
+            time.sleep(0.5)
+def stay_loop():
+    icao = pelaaja[location]
+    print(f"You have decided to stay in {icao}.")
+    return icao,
 
-    print("\nCongratulations! You've reached the final stage and found the rat!")
-    exit()
 
-main_game_loop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
