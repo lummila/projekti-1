@@ -84,7 +84,7 @@ NEG_COINCIDENCES = [
 ]
 
 
-def clear():
+def clear():  #  tyhjentää konsolin tarpeettomasta tekstistä joka printattiin aiemmin
     return os.system('cls')
 
 
@@ -404,13 +404,13 @@ def help_menu():
     }
     print("\n------------------------------\n"
           "Quick commands: \n")
-    for i, i2 in user_input_tips.items():  # prints out input tips for the user
+    for i, i2 in user_input_tips.items():  # prints out input tips for the user via iterators
         print(f"{i}: {i2}")
     help_input = input("\nPlease enter a quick command: ").lower()
     while help_input != "exit":
         if help_input == "return":  # exits the "instructions" loop with given user input
             return
-        elif help_input == "rules":
+        elif help_input == "rules":  #  prints out a shortened version of the game rules
             clear()
             print(OHJEET)
             time.sleep(2.0)
@@ -430,7 +430,7 @@ def help_menu():
             status()
             return help_menu()
         else:
-            print("Unknown command.")
+            print("Unknown command.")  #  user enters an invalid input
             help_input = input("\nPlease enter a quick command: ").lower()
     else:
         exit()
@@ -475,41 +475,41 @@ def coincidence(positive: bool):
 
 
 def travel_loop():  # THE main loop
-    while True:
+    while True:  #  kysyy käyttäjältä minne hän haluaa lentää
         clear()
         status()
         print("\nType '?' to open Help menu, 'return' to return, 'exit' to exit.")
         icao = input("\nWhere do you wish to fly?: ").strip().upper()
         if icao == "?":
             help_menu()
-        elif icao == "EXIT":
+        elif icao == "EXIT":  #  käyttäjä voi poistua milloin haluaa
             exit()
-        elif icao == "RETURN":
+        elif icao == "RETURN":  #  käyttäjä voi palata edelliseen kohtaan (looppi päättyy)
             return
 
         icao_index = [i for i in DEST_ICAO if DEST_ICAO[i] == icao][0]
 
-        if icao == pelaaja["location"]:
+        if icao == pelaaja["location"]:  #  käyttäjä syöttää vahingossa nykyisen sijaintinsa uuden kohteen sijaan --> uudelleen
             print("You're already in this location...")
             time.sleep(4.0)
             continue
-
+        #  pelaaja valitsee oikean lentokentän (rotan aikaisempi olinpaikka)
         if icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index in ROTTA["destinations"]:
 
-            price = trip_price(pelaaja["location"], icao)
+            price = trip_price(pelaaja["location"], icao) # selvittää lennon hinnan hinta-funktion avulla
 
-            if pelaaja["money"] < price:
+            if pelaaja["money"] < price:  #  jos pelaajalla ei ole varaa lentoon, joutuu pelaaja jäämään kentälle
                 print("\nYou cannot afford this flight...")
                 time.sleep(4.0)
                 continue
-
+            #  emissionsiin lasketaan lennon päästöt
             emissions = math.floor(check_for_dist(
                 sql_coordinate_query(pelaaja["location"], icao), True))
 
             dest = sql_destination(icao)
             print(
                 f"You have travelled to the correct airport: {dest[1]}.")
-
+            #  vähentää pelaajan rahoista matkan, päivittää käytetyt kierrokset ja pelaajan tilastot, pelaaja siirtyy seuravaalle tasolle
             pelaaja["money"] -= price
             pelaaja["round"] += 1
             pelaaja["can_advance"] = True
@@ -518,7 +518,7 @@ def travel_loop():  # THE main loop
 
             time.sleep(4.0)
             return icao
-
+        #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
         elif icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index not in ROTTA["destinations"]:
 
             price = trip_price(pelaaja["location"], icao)
@@ -533,7 +533,7 @@ def travel_loop():  # THE main loop
 
             print(
                 f"You travelled to the wrong airport: {sql_destination(icao)[1]}...")
-
+            #  pelaaja ei voi vielä edetä seuraavalle tasolle + pelaajan tilastot päivitetään
             pelaaja["money"] -= price
             pelaaja["round"] += 1
             pelaaja["can_advance"] = False
@@ -542,7 +542,7 @@ def travel_loop():  # THE main loop
 
             time.sleep(4.0)
             return icao
-        else:
+        else: # käyttäjä kirjoittaa virheellisen syötteen, ohjelma pyytää kirjoittamaan uudestaan
             print("\nInvalid input, please try again.")
             time.sleep(2.0)
 
@@ -627,7 +627,7 @@ while pelaajan_input != "exit":
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
-    elif pelaajan_input == "fly":
+    elif pelaajan_input == "fly":  #  pelaajan syöte käynnistää lento-funktion
         travel = travel_loop()
         if travel:
             pelaaja["location"] = travel
