@@ -248,6 +248,14 @@ def sql_destination(icao: str):
         # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
         return [result[0][2], result[0][0], result[0][1]]
 
+def sql_select_5_top_players():
+    sql = f"select money, screen_name from game order by money desc limit 5;"
+    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
+    cursor, result = sql_execute(sql)
+    print(f"Here are the top 5 player scores")
+    for i in range(0, 5):
+        print(f"{i+1}. Points: {result[i][0]} Screen name: {result[i][1]}")
+    return
 
 def sql_coordinate_query(start: str, dest: str):
     location_list = []
@@ -269,16 +277,6 @@ def sql_coordinate_query(start: str, dest: str):
             location_list.append(result[0])
     # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
     return location_list
-
-def sql_select_5_top_players():
-    sql = f"select money, screen_name from game order by money desc limit 5;"
-    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    cursor, result = sql_execute(sql)
-    print(f"Here are the top 5 player scores")
-    for i in range(0, 5):
-        print(f"{i+1}. Points: {result[i][0]} Screen name: {result[i][1]}")
-    return
-
 
 
 # Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
@@ -526,6 +524,8 @@ def travel_loop():  # THE main loop
             pelaaja["coincidence"] = coincidence(True)
             pelaaja["emissions"] += emissions
 
+            if pelaaja["round"] == 10:
+                final_round()
             time.sleep(4.0)
             return icao
         #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
@@ -550,12 +550,22 @@ def travel_loop():  # THE main loop
             pelaaja["coincidence"] = coincidence(False)
             pelaaja["emissions"] += emissions
 
+
             time.sleep(4.0)
             return icao
         else: # käyttäjä kirjoittaa virheellisen syötteen, ohjelma pyytää kirjoittamaan uudestaan
             print("\nInvalid input, please try again.")
             time.sleep(2.0)
 
+#Final Round päättää pelin
+def final_round():
+    if (pelaaja["round"]) == 10 and (pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]):
+        print(f"You win! Your emissions were {pelaaja['emissions']} grams and you have money left {pelaaja['money']} euros.")
+        sql_select_5_top_players()
+    else:
+        print(f"You lost! Your emissions were {pelaaja['emissions']} grams and you have money left {pelaaja['money']} euros.")
+        sql_select_5_top_players()
+        exit()
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
 # Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktion.
@@ -584,16 +594,8 @@ def game_start():
 
 
 # --------------------------------------
-#Final Round päättää pelin ja pyörittää top 5 players.
-def final_round():
-    if (pelaaja["round"]) == 10 and (pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]):
-        print(f"You win! Your emissions were {pelaaja['emissions']} grams and you have {pelaaja['money']} euros left.\n")
-        sql_select_5_top_players()
-        exit()
-    else:
-        print(f"You lost! Your emissions were {pelaaja['emissions']} grams and you have {pelaaja['money']} euros left.\n")
-        sql_select_5_top_players()
-        exit()
+
+
 
 # pelaaja = [sijainti 0, massit 1, emissiot 2, kierros 3]
 # pelaaja = ["EFHK", 0, 0, 0]
@@ -635,8 +637,8 @@ elif esittele_ohjeet == "y":
 
 # Pelaajan (tätä tarvitaan siihen, että kirjautuneen pelaajan nimi talletetaan ["name"]-osioon) ja rotan init:
 ROTTA, pelaaja = game_start()
-#pelaaja["round"] = 10
-#pelaaja["location"] = DEST_ICAO[ROTTA["destinations"][5]]
+pelaaja["round"] = 10
+
 
 #############################
 # LOGIN
@@ -653,9 +655,10 @@ time.sleep(1.0)
 # main looppi
 pelaajan_input = ""
 while pelaajan_input != "exit":
+    status()
     if pelaaja["round"] == 10:
         final_round()
-    status()
+        sql_select_5_top_players()
     pelaajan_input = input(
         "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower().strip()
     # - pelaajan input
@@ -665,9 +668,9 @@ while pelaajan_input != "exit":
         travel = travel_loop()
         if travel:
             pelaaja["location"] = travel
-
-    # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
+  # - ehtolausekkeet sille mitä pelaaja on kirjoittanut
     # - oikean funktion käynnistäminen
-
 else:
     exit()
+
+
