@@ -7,6 +7,7 @@ current_stage = 0  #  final stage = 5
 rounds_left = 10  #  player can run out of rounds (0... pretty obvious)
 import os
 import time
+from colorama import Fore, Back, Style
 
 quick_guide = ("\n\n------------------------------------------------------------------------------------------------\n"
                "You have a 10 round limit. You can check how many rounds you"
@@ -184,16 +185,16 @@ def travel_loop(possible_flight_locations): # THE main loop
         else:
             print("Invalid input, please try again.")
             time.sleep(0.5)
-def stay_funcy():
+def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
     while True:
         clear()
         status()
-        print(f"You have decided or had to stay at {pelaaja['location']} and work for money!")
+        print(f"You have decided or had to stay at {pelaaja['location']} and work for money!\n")
         job = input("Choose a job to work at:\n\n"
-                "BURGER = You're going to be flipping some burgers.\n"
-                "FLOWER = The flower shop could need a hand.\n"
-                "EXCHANGE = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
-                "Type in: BUR / FLO / EXC").strip().upper()
+                f"{Fore.RED}BURGER = You're going to be flipping some burgers.\n"
+                f"{Fore.GREEN}FLOWER = The flower shop could need a hand.\n"
+                f"{Fore.YELLOW}EXCHANGE = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
+                f"{Fore.WHITE}{Back.BLACK}Type in: BUR / FLO / EXC").strip().upper()
         if job == "?":  #  käyttäjä avaa help-moduulin
             help_menu()
         elif job == "EXIT":  #  Käyttäjä voi aina poistua ohjelmasta
@@ -204,19 +205,19 @@ def stay_funcy():
             # Pelaaja valitsee työpaikan lentokentältä/ansaitsee rahaa lentämistä varten.
             # Pelaajan ansaitsemat rahat päivitetään pelin tietoihin
             print("\nYou decided to work at the Burger Shack! Have some money!")
-            pelaaja["money"] += 200
+            pelaaja["money"] += 175
             pelaaja["round"] += 1
             time.sleep(4.0)
             return
         elif job == "FLO":  #  työvaihtoehto 2
             print("\n You decided to go and wrap some flowers! Here's some cash to keep you going!")
-            pelaaja["money"] += 200
+            pelaaja["money"] += 175
             pelaaja["round"] += 1
             time.sleep(4.0)
             return
         elif job == "EXC":  #  työvaihtoehto 3
             print("\n We will trust that you count the bills correctly! Take some money!")
-            pelaaja["money"] += 200
+            pelaaja["money"] += 175
             pelaaja["round"] += 1
             time.sleep(4.0)
             return
