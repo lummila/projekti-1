@@ -184,10 +184,53 @@ def travel_loop(possible_flight_locations): # THE main loop
         else:
             print("Invalid input, please try again.")
             time.sleep(0.5)
-def stay_loop():
-    icao = pelaaja[location]
-    print(f"You have decided to stay in {icao}.")
-    return icao,
+def stay_funcy():
+    while True:
+        clear()
+        status()
+        print(f"You have decided or had to stay at {pelaaja['location']} and work for money!")
+        job = input("Choose a job to work at:\n\n"
+                "BURGER = You're going to be flipping some burgers.\n"
+                "FLOWER = The flower shop could need a hand.\n"
+                "EXCHANGE = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
+                "Type in: BUR / FLO / EXC").strip().upper()
+        if job == "?":  #  käyttäjä avaa help-moduulin
+            help_menu()
+        elif job == "EXIT":  #  Käyttäjä voi aina poistua ohjelmasta
+            exit()
+        elif job == "RETURN":  #  Käyttäjä haluaa palata takaisin
+            return
+        elif job == "BUR":
+            # Pelaaja valitsee työpaikan lentokentältä/ansaitsee rahaa lentämistä varten.
+            # Pelaajan ansaitsemat rahat päivitetään pelin tietoihin
+            print("\nYou decided to work at the Burger Shack! Have some money!")
+            pelaaja["money"] += 200
+            pelaaja["round"] += 1
+            time.sleep(4.0)
+            return
+        elif job == "FLO":  #  työvaihtoehto 2
+            print("\n You decided to go and wrap some flowers! Here's some cash to keep you going!")
+            pelaaja["money"] += 200
+            pelaaja["round"] += 1
+            time.sleep(4.0)
+            return
+        elif job == "EXC":  #  työvaihtoehto 3
+            print("\n We will trust that you count the bills correctly! Take some money!")
+            pelaaja["money"] += 200
+            pelaaja["round"] += 1
+            time.sleep(4.0)
+            return
+        else:  #  käyttäjä on nakkisormi
+            print("\nInvalid input, try again.")
+            time.sleep(2.0)
+
+
+
+
+
+
+
+
 
 
 
