@@ -270,6 +270,16 @@ def sql_coordinate_query(start: str, dest: str):
     # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
     return location_list
 
+def sql_select_5_top_players():
+    sql = f"select money, screen_name from game order by money desc limit 5;"
+    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
+    cursor, result = sql_execute(sql)
+    print(f"Here are the top 5 player scores")
+    for i in range(0, 5):
+        print(f"{i+1}. Points: {result[i][0]} Screen name: {result[i][1]}")
+    return
+
+
 
 # Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
 def hint(icao: str):
@@ -574,11 +584,21 @@ def game_start():
 
 
 # --------------------------------------
+#Final Round päättää pelin ja pyörittää top 5 players.
+def final_round():
+    if (pelaaja["round"]) == 10 and (pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]):
+        print(f"You win! Your emissions were {pelaaja['emissions']} grams and you have {pelaaja['money']} euros left.\n")
+        sql_select_5_top_players()
+        exit()
+    else:
+        print(f"You lost! Your emissions were {pelaaja['emissions']} grams and you have {pelaaja['money']} euros left.\n")
+        sql_select_5_top_players()
+        exit()
 
 # pelaaja = [sijainti 0, massit 1, emissiot 2, kierros 3]
 # pelaaja = ["EFHK", 0, 0, 0]
 
-
+'''
 #############################
 # SQL-yhteys
 connection = mysql.connector.connect(
@@ -590,7 +610,17 @@ connection = mysql.connector.connect(
     autocommit=True
 )
 #############################
+'''
 
+# SQL-yhteys
+connection = mysql.connector.connect(
+    host="127.0.0.1",
+    port=3306,
+    database="velkajahti",
+    user="root",
+    password="",
+    autocommit=True
+)
 #############################
 # Ohjeet
 esittele_ohjeet = input(
@@ -605,6 +635,8 @@ elif esittele_ohjeet == "y":
 
 # Pelaajan (tätä tarvitaan siihen, että kirjautuneen pelaajan nimi talletetaan ["name"]-osioon) ja rotan init:
 ROTTA, pelaaja = game_start()
+#pelaaja["round"] = 10
+#pelaaja["location"] = DEST_ICAO[ROTTA["destinations"][5]]
 
 #############################
 # LOGIN
@@ -621,6 +653,8 @@ time.sleep(1.0)
 # main looppi
 pelaajan_input = ""
 while pelaajan_input != "exit":
+    if pelaaja["round"] == 10:
+        final_round()
     status()
     pelaajan_input = input(
         "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower().strip()
