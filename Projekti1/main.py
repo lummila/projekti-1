@@ -219,10 +219,10 @@ def tutorial():
 
 
 def sql_scores(leaderboard: bool):
-    if leaderboard:
+    if leaderboard:  # Top 10 kaikkien pelaajien pisteet
         sql = "select points, screen_name from goal "
         sql += "order by points desc limit 10;"
-    else:
+    else:  # Aktiivisen pelaajan parhaat pisteet
         sql = f"select points from goal where screen_name = '{pelaaja['name']}' "
         sql += "order by points desc;"
 
@@ -253,7 +253,7 @@ def sql_scores(leaderboard: bool):
 
     input("\nPress Enter to continue...")
     status()
-    help_menu()
+    help_menu()  # Palaa takaisin apuvalikkoon
 
     return True
 
