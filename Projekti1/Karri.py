@@ -7,7 +7,7 @@ current_stage = 0  #  final stage = 5
 rounds_left = 10  #  player can run out of rounds (0... pretty obvious)
 import os
 import time
-from colorama import Fore, Back, Style
+from colorama import Fore as CF, Back as CB, Style as CS
 
 quick_guide = ("\n\n------------------------------------------------------------------------------------------------\n"
                "You have a 10 round limit. You can check how many rounds you"
@@ -189,12 +189,13 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
     while True:
         clear()
         status()
-        print(f"You have decided or had to stay at {pelaaja['location']} and work for money!\n")
+        print(f"You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n")
+        time.sleep(3.0)
         job = input("Choose a job to work at:\n\n"
-                f"{Fore.RED}BURGER = You're going to be flipping some burgers.\n"
-                f"{Fore.GREEN}FLOWER = The flower shop could need a hand.\n"
-                f"{Fore.YELLOW}EXCHANGE = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
-                f"{Fore.WHITE}{Back.BLACK}Type in: BUR / FLO / EXC").strip().upper()
+                f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
+                f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
+                f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
+                f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / {CF.YELLOW}EXC{CF.RESET}\n\n").strip().upper()
         if job == "?":  #  käyttäjä avaa help-moduulin
             help_menu()
         elif job == "EXIT":  #  Käyttäjä voi aina poistua ohjelmasta
@@ -222,7 +223,7 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
             input("Press Enter to continue...")
             return
         else:  #  käyttäjä on nakkisormi
-            print("\nInvalid input, try again.")
+            print(f"{CF.RED}\nInvalid input, please try again.{CF.RESET}")
             time.sleep(3.0)
 
 
