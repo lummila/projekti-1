@@ -708,8 +708,8 @@ while pelaajan_input != "exit":
         final_round()
     status()
     pelaajan_input = input(
-        f"\n{CF.BLUE}'fly'{CF.RESET} to travel, {CF.YELLOW}'?'{CF.RESET} to open menu,"
-        f" {CF.RED}'exit'{CF.RESET} to quit game: ").lower().strip()
+        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu,"
+        f" '{CF.RED}exit{CF.RESET}' to quit game: ").lower().strip()
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
