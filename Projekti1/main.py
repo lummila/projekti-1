@@ -719,7 +719,7 @@ connection = mysql.connector.connect(
 #############################
 # Ohjeet
 esittele_ohjeet = input(
-    f"Do you wish to read the instructions? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N){CF.RESET}: ").lower()
+    f"Do you wish to read the instructions? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N{CF.RESET}): ").lower()
 if esittele_ohjeet == "exit":
     exit()
 # Ohjeiden selitys
