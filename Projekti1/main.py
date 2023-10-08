@@ -132,9 +132,9 @@ def tutorial():
                 status()
                 tut_progress = input(
                     "\nThat's not quite it. Type in '?': ").strip().lower()
-
-            help_menu()
-            return
+            else:
+                help_menu()
+                return
         # Apuvalikon opettaminen loppuu
         # Opetetaan pelaajalle työntekoa
         if learn_work:
@@ -617,35 +617,32 @@ def help_menu():
     }
     print("\n------------------------------\n"
           "Quick commands: \n")
-    for i, i2 in user_input_tips.items():  # prints out input tips for the user via iterators
+    for i, i2 in user_input_tips.items():  # Tulostaa kaikki mahdolliset komennot
         print(f"{i}: {i2}")
+
     help_input = input("\nPlease enter a quick command: ").strip().lower()
-    while help_input != "exit":
-        if help_input == "return":  # exits the "instructions" loop with given user input
-            return
-        elif help_input == "rules":  # prints out a shortened version of the game rules
+    while help_input != "return":
+        if help_input == "exit":  # Lopeta peli
+            exit()
+        elif help_input == "rules":  # Tulostaa pelin ohjeet
             clear()
             print(OHJEET)
             input("\nPress Enter to continue...")
-            clear()
             status()
-            return help_menu()
-        elif help_input == "leaderboard":
+            help_menu()
+            return
+        elif help_input == "leaderboard":  # Tulostaa top 10 pisteet
             sql_scores(True)
-            clear()
-            status()
-            return help_menu()
-        elif help_input == "personal":
+            return
+        elif help_input == "personal":  # Tulostaa omat pisteet
             sql_scores(False)
-            clear()
-            status()
-            return help_menu()
+            return
         else:
-            # user enters an invalid input
+            # Tuntematon komento
             print(f"{CF.RED}Unknown command.{CF.RESET}")
-        help_input = input("\nPlease enter a quick command: ").lower()
+        help_input = input("\nPlease enter a quick command: ").strip().lower()
     else:
-        exit()
+        return
 
 
 def coincidence(positive: bool):
@@ -883,7 +880,7 @@ input("Press Enter to continue...")
 #############################
 # Tutorial
 play_tutorial = input(
-    f"\nPlay the tutorial to learn to play the game? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N{CF.RESET}): ").lower()
+    f"\nPlay the {CF.MAGENTA}tutorial{CF.RESET} to learn to play the game? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N{CF.RESET}): ").lower()
 if play_tutorial == "exit":
     exit()
 elif play_tutorial == "y":
