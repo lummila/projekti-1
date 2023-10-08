@@ -207,19 +207,19 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
             print("\nYou decided to work at the Burger Shack! Have some money!")
             pelaaja["money"] += 175
             pelaaja["round"] += 1
-            time.sleep(4.0)
+            input("Press Enter to continue...")
             return
         elif job == "FLO":  #  työvaihtoehto 2
             print("\n You decided to go and wrap some flowers! Here's some cash to keep you going!")
             pelaaja["money"] += 175
             pelaaja["round"] += 1
-            time.sleep(4.0)
+            input("Press Enter to continue...")
             return
         elif job == "EXC":  #  työvaihtoehto 3
             print("\n We will trust that you count the bills correctly! Take some money!")
             pelaaja["money"] += 175
             pelaaja["round"] += 1
-            time.sleep(4.0)
+            input("Press Enter to continue...")
             return
         else:  #  käyttäjä on nakkisormi
             print("\nInvalid input, try again.")
