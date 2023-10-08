@@ -223,7 +223,7 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
             return
         else:  #  käyttäjä on nakkisormi
             print("\nInvalid input, try again.")
-            time.sleep(2.0)
+            time.sleep(3.0)
 
 
 
