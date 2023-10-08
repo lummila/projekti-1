@@ -619,6 +619,48 @@ def travel_loop():  # THE main loop
             input(f"{CF.RED}\nInvalid input, please try again.{CF.RESET} Press Enter to continue.")
 
 
+def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
+    while True:
+        clear()
+        status()
+        print(f"You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n")
+        input("Press enter to continue...")
+        job = input("Choose a job to work at:\n\n"
+                f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
+                f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
+                f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
+                f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / {CF.YELLOW}EXC{CF.RESET}\n\n").strip().upper()
+        if job == "?":  #  käyttäjä avaa help-moduulin
+            help_menu()
+        elif job == "EXIT":  #  Käyttäjä voi aina poistua ohjelmasta
+            exit()
+        elif job == "RETURN":  #  Käyttäjä haluaa palata takaisin
+            return
+        elif job == "BUR":
+            # Pelaaja valitsee työpaikan lentokentältä/ansaitsee rahaa lentämistä varten.
+            # Pelaajan ansaitsemat rahat päivitetään pelin tietoihin
+            print("\nYou decided to work at the Burger Shack! Have some money!")
+            pelaaja["money"] += 175
+            pelaaja["round"] += 1
+            input("Press Enter to continue...")
+            return
+        elif job == "FLO":  #  työvaihtoehto 2
+            print("\n You decided to go and wrap some flowers! Here's some cash to keep you going!")
+            pelaaja["money"] += 175
+            pelaaja["round"] += 1
+            input("Press Enter to continue...")
+            return
+        elif job == "EXC":  #  työvaihtoehto 3
+            print("\n We will trust that you count the bills correctly! Take some money!")
+            pelaaja["money"] += 175
+            pelaaja["round"] += 1
+            input("Press Enter to continue...")
+            return
+        else:  #  käyttäjä on nakkisormi
+            print(f"{CF.RED}\nInvalid input, please try again.{CF.RESET}")
+            input("Press enter to continue...")
+
+
 # Final Round päättää pelin ja pyörittää top 10 players.
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
