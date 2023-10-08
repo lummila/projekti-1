@@ -624,7 +624,7 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
         clear()
         status()
         print(f"You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n")
-        input("Press enter to continue...")
+        input("Press Enter to continue...")
         job = input("Choose a job to work at:\n\n"
                 f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
                 f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
@@ -658,7 +658,7 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
             return
         else:  #  käyttäjä on nakkisormi
             print(f"{CF.RED}\nInvalid input, please try again.{CF.RESET}")
-            input("Press enter to continue...")
+            input("Press Enter to continue...")
 
 
 # Final Round päättää pelin ja pyörittää top 10 players.
