@@ -4,6 +4,7 @@ import os
 import locale
 import mysql.connector
 from geopy import distance
+from colorama import Fore as CF, Back as CB, Style as CS
 
 os.system('cls')
 locale.setlocale(locale.LC_ALL, 'fi-FI')
@@ -166,7 +167,7 @@ def sql_execute(code: str):
 
 def login(username: str):
     while len(username) < 3:
-        username = input("Please enter a username longer than 2 letters: ")
+        username = input(f"{CF.YELLOW}Please enter a username longer than 2 letters:{CF.RESET} ")
     if username.lower() == "exit":
         exit()
 
@@ -186,7 +187,7 @@ def login(username: str):
 
         while login_input not in ["y", "n", "exit"]:
             login_input = input(
-                "Invalid command, enter Y, N or exit: ").lower()
+                f"{CF.RED}Invalid command, enter Y, N or exit:{CF.RESET} ").lower()
 
         if login_input == "exit":
             exit()  # Ohjelma sulkeutuu
@@ -204,7 +205,7 @@ def login(username: str):
                     exit()
                 else:
                     new_PIN = input(
-                        "Entered PIN code is invalid. Please enter a 4-number PIN code: ")
+                        f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
 
             # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
             sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
@@ -238,7 +239,7 @@ def login(username: str):
         cursor, result = sql_execute(sql_old_PIN)
 
         if not result:
-            print("Invalid username or PIN code.")
+            print(f"{CF.RED}Invalid username or PIN code.{CF.RESET}")
             return False
 
         #####################
@@ -250,7 +251,7 @@ def login(username: str):
             print("Successfully logged in!")
             return True
         else:
-            print("Something went wrong with login credentials...")
+            print(f"{CF.RED}Something went wrong with login credentials...{CF.RESET}")
             return False
 
 # Pelaajan arvojen muuttamisfunktiot
@@ -308,7 +309,7 @@ def sql_destination(icao: str):
     cursor, result = sql_execute(sql)
 
     if cursor.rowcount <= 0:  # Ei tuloksia
-        print("Jokin meni vikaan, tarkista syötetty ICAO-koodi.")
+        print(f"{CF.RED}Something went wrong. Check the ICAO code.{CF.RESET}")
         return -1
     else:
         # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
@@ -329,7 +330,7 @@ def sql_coordinate_query(start: str, dest: str):
         cursor, result = sql_execute(sql)
 
         if cursor.rowcount <= 0:
-            print("ERROR calculating coordinates in sql_coordinate_query()")
+            print(f"{CF.RED}ERROR calculating coordinates in sql_coordinate_query(){CF.RESET}")
             return -1
         else:
             # Lisätään locationList-listaan tuple, jossa koordinaatit
@@ -356,7 +357,7 @@ def hint(icao: str):
     _, result = sql_execute(sql)
 
     if not result:
-        return "ERROR fetching hint from hints!"
+        return f"{CF.RED}ERROR fetching hint from hints!{CF.RESET}"
     else:
         return result[0][0]
 
@@ -465,7 +466,7 @@ def status():
         f'"{display_hint(pelaaja["location"], pelaaja["can_advance"])}"' + "\x1B[0m" + "\n")
 
     # Listaa pelaajalle mahdolliset
-    print("Possible flight locations:")
+    print(f"{CF.YELLOW}{CB.BLACK}Possible flight locations:{CF.RESET}{CB.RESET}")
     possible_flight_locations(
         pelaaja["location"], pelaaja["can_advance"], True)
 #############################
@@ -474,11 +475,11 @@ def status():
 # Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
 def help_menu():
     user_input_tips = {
-        'Return': 'Continue the game.',
-        'Rules': 'Display the rules of the game.',
-        'Leaderboard': 'Displays top 10 scores.',
-        'Personal': 'Displays your own previous scores.',
-        'Exit': 'Exits the game. Always available.',
+        f'{CF.CYAN}Return{CF.RESET}': 'Continue the game.',
+        f'{CF.YELLOW}Rules{CF.RESET}': 'Display the rules of the game.',
+        f'{CF.GREEN}Leaderboard{CF.RESET}': 'Displays top 10 scores.',
+        f'{CF.BLUE}Personal{CF.RESET}': 'Displays your own previous scores.',
+        f'{CF.RED}Exit{CF.RESET}': 'Exits the game. Always available.',
     }
     print("\n------------------------------\n"
           "Quick commands: \n")
@@ -500,7 +501,7 @@ def help_menu():
         elif help_input == "personal":
             sql_scores(False)
         else:
-            print("Unknown command.")  # user enters an invalid input
+            print(f"{CF.RED}Unknown command.{CF.RESET}")  # user enters an invalid input
             help_input = input("\nPlease enter a quick command: ").lower()
     else:
         exit()
@@ -548,7 +549,8 @@ def travel_loop():  # THE main loop
     while True:  # kysyy käyttäjältä minne hän haluaa lentää
         clear()
         status()
-        print("\nType '?' to open Help menu, 'return' to return, 'exit' to exit.")
+        print(f"\nType {CF.YELLOW}'?'{CF.RESET} to open Help menu, {CF.BLUE}'return'{CF.RESET} to return,"
+              f" {CF.RED}'exit'{CF.RESET} to exit.")
         icao = input("\nWhere do you wish to fly?: ").strip().upper()
         if icao == "?":
             help_menu()
@@ -572,7 +574,7 @@ def travel_loop():  # THE main loop
 
             # jos pelaajalla ei ole varaa lentoon, joutuu pelaaja jäämään kentälle
             if pelaaja["money"] < price:
-                input("\nYou cannot afford this flight. Press Enter to continue.")
+                input(f"{CF.RED}\nYou cannot afford this flight.{CF.RESET} Press Enter to continue.")
                 continue
             #  emissionsiin lasketaan lennon päästöt
             emissions = math.floor(check_for_dist(
@@ -580,7 +582,7 @@ def travel_loop():  # THE main loop
 
             dest = sql_destination(icao)
             print(
-                f"You have travelled to the correct airport: {dest[1]}.")
+                f"{CF.GREEN}You have travelled to the correct airport:{CF.RESET} {dest[1]}.")
             #  vähentää pelaajan rahoista matkan, päivittää käytetyt kierrokset ja pelaajan tilastot, pelaaja siirtyy seuravaalle tasolle
             pelaaja["money"] -= price
             pelaaja["round"] += 1
@@ -603,7 +605,7 @@ def travel_loop():  # THE main loop
                 sql_coordinate_query(pelaaja["location"], icao), True))
 
             print(
-                f"You travelled to the wrong airport: {sql_destination(icao)[1]}.")
+                f"{CF.RED}You travelled to the wrong airport:{CF.RESET} {sql_destination(icao)[1]}.")
             #  pelaaja ei voi vielä edetä seuraavalle tasolle + pelaajan tilastot päivitetään
             pelaaja["money"] -= price
             pelaaja["round"] += 1
@@ -614,20 +616,20 @@ def travel_loop():  # THE main loop
             input("\nPress enter to continue...")
             return icao
         else:  # käyttäjä kirjoittaa virheellisen syötteen, ohjelma pyytää kirjoittamaan uudestaan
-            input("\nInvalid input, please try again. Press Enter to continue.")
+            input(f"{CF.RED}\nInvalid input, please try again.{CF.RESET} Press Enter to continue.")
 
 
 # Final Round päättää pelin ja pyörittää top 10 players.
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
         print(
-            f"You win! Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
+            f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
         sql_insert_score()
         sql_scores(True)
         exit()
     else:
         print(
-            f"You lost! Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
+            f"{CF.RED}You lost!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
         sql_scores(True)
         exit()
 
@@ -675,7 +677,7 @@ connection = mysql.connector.connect(
 #############################
 # Ohjeet
 esittele_ohjeet = input(
-    "Do you wish to read the instructions? (Y / N): ").lower()
+    f"Do you wish to read the instructions? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N){CF.RESET}: ").lower()
 if esittele_ohjeet == "exit":
     exit()
 # Ohjeiden selitys
@@ -706,7 +708,8 @@ while pelaajan_input != "exit":
         final_round()
     status()
     pelaajan_input = input(
-        "\n'fly' to travel, '?' to open menu, 'exit' to quit game: ").lower().strip()
+        f"\n{CF.BLUE}'fly'{CF.RESET} to travel, {CF.YELLOW}'?'{CF.RESET} to open menu,"
+        f" {CF.RED}'exit'{CF.RESET} to quit game: ").lower().strip()
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
