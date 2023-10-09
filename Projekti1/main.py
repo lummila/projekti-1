@@ -34,7 +34,7 @@ os.system('cls')
 
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
-admin_root_name = "metropolia"
+admin_root_passcode = "metropolia"
 #########################################################################################
 
 DEST_ICAO = {
@@ -131,27 +131,31 @@ def sql_scores(leaderboard: bool):
 
     _, result = sql_execute(sql, True)
 
-    if not result:
-        print("ERROR fetching scores in sql_scores()")
-        return False
-
     clear()
 
     if leaderboard:
         print("+----------------------------------------------------+")
         print("| The leaderboard of top 10 scores in Chase the Rat: |")
         print("+----------------------------------------------------+")
-        for entry in result:
-            print(
-                f"  {entry[0]}\t\t{entry[1]}")
+
+        if not result:
+            print("  No top scores available.")
+        else:
+            for entry in result:
+                print(
+                    f"  {entry[0]}\t\t{entry[1]}")
         print("+----------------------------------------------------+")
     else:
         print("+----------------------------------------------------+")
         print("|            Your personal best scores:              |")
         print("+----------------------------------------------------+")
-        for entry in result:
-            print(
-                f"  {entry[0]}")
+
+        if not result:
+            print("  No personal scores available.")
+        else:
+            for entry in result:
+                print(
+                    f"  {entry[0]}")
         print("+----------------------------------------------------+")
 
     input("\nPress Enter to continue...")
@@ -165,12 +169,15 @@ def sql_insert_score():
 
     _, result = sql_execute(sql, True)
     if not result:
-        print("ERROR fetching player id in sql_insert_score()")
+        print("ERROR fetching player name in sql_insert_score()")
         return False
 
     player_id = result[0][0]
     player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
-                              < 10 else 1) + (ROTTA["emissions"] - pelaaja["emissions"]) / 1000))
+                              < 10 else 1) + ((ROTTA["emissions"] - pelaaja["emissions"]) / 1000)))
+
+    if player_score <= 0:
+        player_score = 1
 
     sql = "insert into goal (id, screen_name, points) "
     sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
@@ -225,7 +232,7 @@ def sql_login(username: str):
                 "Enter your new 4-digit PIN code: ")
 
             # Jos PIN-koodi ei ole validi
-            while len(new_PIN) != 4 or not new_PIN.isdigit():
+            while not new_PIN.isdigit() or (len(new_PIN) != 4):
                 # Pitää muistaa aina päästää käyttäjä pois
                 if new_PIN == "exit":
                     exit()
@@ -253,9 +260,13 @@ def sql_login(username: str):
     else:
         old_user_PIN = input("Input your 4-digit PIN code: ")
 
-        # Käyttäjän pitää aina päästä ulos
-        if old_user_PIN.upper() == "EXIT":
-            exit()
+        while not old_user_PIN.isdigit() or (len(old_user_PIN) != 4):
+            # Pitää muistaa aina päästää käyttäjä pois
+            if old_user_PIN == "exit":
+                exit()
+            else:
+                old_user_PIN = input(
+                    f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
 
         old_user_PIN = int(old_user_PIN)
 
@@ -550,12 +561,10 @@ def display_hint(current_location: str, can_advance: bool):
         hint_index = 3
     elif location < 40:
         hint_index = 4
-    elif location < 50:
-        hint_index = 5
     else:
         hint_index = 5
 
-    if not can_advance and hint_index != 5:
+    if not can_advance and location < 50:
         hint_index -= 1
 
     return sql_hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
@@ -820,7 +829,7 @@ def stay():
         clear()
         status()
         print(
-            f"+ You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n|")
+            f"\n+ You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n|")
         job = input("| Choose a job to work at:\n|\n"
                     f"| {CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
                     f"| {CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
@@ -918,7 +927,7 @@ connection = mysql.connector.connect(
     port=3306,
     database="velkajahti",
     user="root",
-    password=admin_root_name,
+    password=admin_root_passcode,
     autocommit=True
 )
 #########################################################################################
@@ -940,7 +949,7 @@ elif instructions == "y":
 #########################################################################################
 clear()
 pelaajan_nimi = input(
-    "\nPlease enter your username to log in: ").strip().upper()
+    "Please enter your username to log in: ").strip().upper()
 
 # Liian pienet nimet ei vetele
 while len(pelaajan_nimi) < 3:
