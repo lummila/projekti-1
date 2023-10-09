@@ -221,7 +221,7 @@ def sql_scores(leaderboard: bool):
         sql = f"select points from goal where screen_name = '{pelaaja['name']}' "
         sql += "order by points desc limit 10;"
 
-    _, result = sql_execute(sql)
+    _, result = sql_execute(sql, True)
 
     if not result:
         print("ERROR fetching scores in sql_scores()")
@@ -255,7 +255,7 @@ def sql_scores(leaderboard: bool):
 def sql_insert_score():
     sql = f"select id from game where screen_name = '{pelaaja['name']}';"
 
-    _, result = sql_execute(sql)
+    _, result = sql_execute(sql, True)
     if not result:
         print("ERROR fetching player id in sql_insert_score()")
         return False
@@ -267,7 +267,7 @@ def sql_insert_score():
     sql = "insert into goal (id, screen_name, points)"
     sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
 
-    cursor, _ = sql_execute(sql)
+    cursor = sql_execute(sql, False)
     if cursor.rowcount < 1:
         print("ERROR inserting player record in sql_insert_score()")
         return False
@@ -280,14 +280,14 @@ def clear():  # tyhjentää konsolin tarpeettomasta tekstistä joka printattiin 
 
 
 # Lyhennys sql:n kanssa kommunikoinnissa
-
-
-def sql_execute(code: str):
+def sql_execute(code: str, result: bool):
     cursor = connection.cursor()
     cursor.execute(code)
-    result = cursor.fetchall()
-
-    return (cursor, result)
+    if result:
+        result = cursor.fetchall()
+        return (cursor, result)
+    else:
+        return cursor
 
 
 def login(username: str):
@@ -302,7 +302,7 @@ def login(username: str):
     sql = "select screen_name from game "
     sql += f"where screen_name = '{username}';"
 
-    (cursor, result) = sql_execute(sql)
+    cursor, result = sql_execute(sql, True)
 
     #########################
     #########################
@@ -362,7 +362,7 @@ def login(username: str):
         sql_old_PIN = "select screen_name, passcode from game "
         sql_old_PIN += f"where screen_name = '{username}' and passcode = {old_user_PIN};"
 
-        cursor, result = sql_execute(sql_old_PIN)
+        cursor, result = sql_execute(sql_old_PIN, True)
 
         if not result:
             print(f"{CF.RED}Invalid username or PIN code.{CF.RESET}")
@@ -432,7 +432,7 @@ def sql_destination(icao: str):
     sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
 
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    cursor, result = sql_execute(sql)
+    cursor, result = sql_execute(sql, True)
 
     if cursor.rowcount <= 0:  # Ei tuloksia
         print(f"{CF.RED}Something went wrong. Check the ICAO code.{CF.RESET}")
@@ -453,7 +453,7 @@ def sql_coordinate_query(start: str, dest: str):
         sql += f"where ident = '{start if x == 0 else dest}';"
 
         # SQL:n käyttö
-        cursor, result = sql_execute(sql)
+        cursor, result = sql_execute(sql, True)
 
         if cursor.rowcount <= 0:
             print(
@@ -469,7 +469,7 @@ def sql_coordinate_query(start: str, dest: str):
 def sql_select_5_top_players():
     sql = f"select money, screen_name from game order by money desc limit 5;"
     # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    cursor, result = sql_execute(sql)
+    _, result = sql_execute(sql, True)
     print(f"Here are the top 5 player scores")
     for i in range(0, 5):
         print(f"{i+1}. Points: {result[i][0]} Screen name: {result[i][1]}")
@@ -481,7 +481,7 @@ def hint(icao: str):
     sql = "select hint from hints "
     sql += f"where ident = '{icao}';"
 
-    _, result = sql_execute(sql)
+    _, result = sql_execute(sql, True)
 
     if not result:
         return f"{CF.RED}ERROR fetching hint from hints!{CF.RESET}"
