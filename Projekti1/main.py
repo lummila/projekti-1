@@ -36,8 +36,10 @@ DEST_ICAO = {
     55: "GCLP",  # Gran Canaria
 }
 
-OHJEET = ("\n------------------------------\n"
-          "Welcome to Chase The Rat!\n\n"
+OHJEET = ("\n\n------------------------------\n"
+          "Welcome to Chase The Rat!\n\nYou'll need to enter an existing username "
+          "and a PIN-code to play with your user\n"
+          "OR you can create new username and a PIN-code.\n\n"
           "In this game you'll travel between different airports, trying to find 'the rat' who owes "
           "you money.\nThe rat has done some airport-hopping "
           "and the game will give you clues of his route and final location.\n"
@@ -57,8 +59,6 @@ OHJEET = ("\n------------------------------\n"
           "\n\nAfter reaching the goal the game will calculate your final points by summing up "
           "\nhow many rounds you used, your emissions and the money that's left."
           "\n\nIf you don't find The rat within the ten rounds: you'll lose.\n"
-          "\nTo play with your user, enter your username and PIN-code "
-          "OR create a new username and a PIN-code.\n"
           f"{CF.GREEN}You can play the tutorial after logging in to learn the basics!{CF.RESET}\n"
           "------------------------------\n\n")
 
