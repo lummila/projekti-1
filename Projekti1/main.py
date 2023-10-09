@@ -273,8 +273,8 @@ def sql_insert_score():
     sql = "insert into goal (id, screen_name, points)"
     sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
 
-    _, result = sql_execute(sql)
-    if not result:
+    cursor, _ = sql_execute(sql)
+    if cursor.rowcount < 1:
         print("ERROR inserting player record in sql_insert_score()")
         return False
 
