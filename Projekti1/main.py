@@ -33,8 +33,8 @@ DEST_ICAO = {
     45: "EIDW",  # Irlanti
     51: "LEBL",  # Espanja (HUOM Viides kierros)
     52: "LPPT",  # Portugali
-    53: "GCTS",  # Tenerife
-    54: "GCFV",  # Fuerteventure
+    53: "GMMX",  # Marokko
+    54: "HECA",  # Egypti
     55: "GCLP",  # Gran Canaria
 }
 
@@ -887,7 +887,7 @@ elif instructions == "y":
 
 #############################
 # LOGIN
-kirjautunut = login(input("Please enter your username to log in: "))
+kirjautunut = login(input("\nPlease enter your username to log in: "))
 # Jos kirjautumisfunktio palauttaa Falsen (ei onnistunut) ja yritetään uudestaan
 while not kirjautunut:
     kirjautunut = login(input("Please enter your username to log in: "))
