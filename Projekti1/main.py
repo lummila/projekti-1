@@ -16,7 +16,11 @@ Asioiden järjestys koodissa:
 14. final_round() pelin päättämistä varten
 15. Pelin aloitusfunktio, joka määrittää rotan ja pelaajan tiedot
 16. SQL-yhteys
-17. 
+17. Pelaajan ja rotan init
+18. Ohjeiden kysyminen, LOGIN, tutorial
+19. Pelin päälooppi, pyörii niin kauan kunnes pelaaja kirjoittaa päävalikossa "exit"
+
+(Aleksi Lummila, Suvi Liimatainen, Karri Partanen, Elli Riskala 2023)
 '''
 
 import random
@@ -28,10 +32,10 @@ from colorama import Fore as CF, Back as CB
 
 os.system('cls')
 
-#############################
+#########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
 admin_root_name = "metropolia"
-#############################
+#########################################################################################
 
 DEST_ICAO = {
     1: "EFHK",  # Helsinki
@@ -897,6 +901,8 @@ def game_start():
     }
 
     return rotta_create, player_create
+
+
 #########################################################################################
 ############################                        #####################################
 ############################   ALOITETAAN RUNTIME   #####################################
