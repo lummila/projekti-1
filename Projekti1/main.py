@@ -59,6 +59,7 @@ OHJEET = ("\n\n------------------------------\n"
           "\n\nAfter reaching the goal the game will calculate your final points by summing up "
           "\nhow many rounds you used, your emissions and the money that's left."
           "\n\nIf you don't find The rat within the ten rounds: you'll lose.\n"
+          f"{CF.GREEN}You can play the tutorial after logging in to learn the basics!{CF.RESET}"
           "------------------------------\n\n")
 
 POS_COINCIDENCES = [
@@ -874,6 +875,7 @@ if instructions == "exit":
     exit()
 # Ohjeiden selitys
 elif instructions == "y":
+    clear()
     print(OHJEET)
     input("Press Enter to continue...")
 #############################
