@@ -67,10 +67,11 @@ DEST_ICAO = {
 }
 
 OHJEET = (f"------------------------------------------------------------------------------------------\n"
-          f"Welcome to {CF.YELLOW}Chase The Rat{CF.RESET}! {CF.RED}This guide is not required, but may help you understand the game.{CF.RESET}\n\nYou'll need to enter an existing {CF.YELLOW}username{CF.RESET} "
+          f"Welcome to {CF.YELLOW}Chase The Rat{CF.RESET}! {CF.RED}This guide is not required, but may help you "
+          f"understand the game.{CF.RESET}\n\nYou'll need to enter an existing {CF.YELLOW}username{CF.RESET}"
           f"and a {CF.YELLOW}PIN-code{CF.RESET} to play with your user\n"
           f"OR you can create new {CF.YELLOW}username{CF.RESET} and a {CF.YELLOW}PIN-code{CF.RESET}.\n\n"
-          f"In this game you'll travel between different {CF.YELLOW}airports{CF.RESET}, trying to find '{CF.RED}the Rat{CF.RESET}' who owes "
+          f"In this game you'll travel between different {CF.YELLOW}airports{CF.RESET}, trying to find '{CF.RED}the Rat{CF.RESET}' who owes"
           f"you money.\nThe rat has done some airport-hopping "
           f"and the game will give you {CF.YELLOW}clues{CF.RESET} of his route and {CF.YELLOW}final location{CF.RESET}.\n"
           f"Each game will draw a new route of {CF.YELLOW}five airports{CF.RESET}, the fifth being the current location of "
@@ -100,7 +101,7 @@ POS_COINCIDENCES = [
     "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n(80€ will be "
     "added to your account)",
     "There was a free seat at a more eco-friendly airplane!\n(10kg was removed from your emissions)",
-    "The airplane took a shorter route. Emissions were 10kg less than expected.\n(10kg of emissions will be removed)",
+    "The airplane took a shorter route. Emissions were 50kg less than expected.\n(50kg of emissions will be removed)",
     "Nothing of note has happened."
 ]
 
@@ -173,8 +174,9 @@ def sql_insert_score():
         return False
 
     player_id = result[0][0]
-    player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
-                              < 10 else 1) + ((ROTTA["emissions"] - pelaaja["emissions"]) / 1000)))
+    emissions_result = (ROTTA["emissions"] - pelaaja["emissions"]) / 1000
+    player_score = math.floor(pelaaja["money"] * ((10 - pelaaja["round"]) if pelaaja["round"]
+                              < 10 else 1) + emissions_result if emissions_result > 0 else 0)
 
     if player_score <= 0:
         player_score = 1
@@ -703,8 +705,8 @@ def coincidence(positive: bool):
             elif index == 2:
                 pelaaja["money"] += 80
             elif index in [3, 4]:
-                if pelaaja["emissions"] >= 10000:
-                    pelaaja["emissions"] -= 10000
+                if pelaaja["emissions"] >= 50000:
+                    pelaaja["emissions"] -= 50000
                 else:
                     pelaaja["emissions"] = 0
     for index, text in enumerate(NEG_COINCIDENCES):
