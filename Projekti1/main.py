@@ -528,7 +528,7 @@ def display_hint(current_location: str, can_advance: bool):
     else:
         hint_index = 5
 
-    if not can_advance:
+    if not can_advance and hint_index != 5:
         hint_index -= 1
 
     return hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
@@ -586,7 +586,7 @@ def status():
     print(f"\n+---------------------------------------------------------+\n"
           f"  Location: ({loc[0]}) {loc[1]}, {loc[2]}\n"
           f"  Money: {pelaaja['money']} €\n"
-          f"  CO2 Emissions: {math.floor(pelaaja['emissions'] / 1000)} g\n"
+          f"  CO2 Emissions: {math.floor(pelaaja['emissions'] / 1000)} kg\n"
           f"  Round: {pelaaja['round']}/10\n"
           f"+---------------------------------------------------------+\n")
 
@@ -907,11 +907,11 @@ elif play_tutorial == "y":
 # main looppi
 pelaajan_input = ""
 while pelaajan_input != "exit":
-    if pelaaja["round"] == 10 or pelaaja["location"] == ROTTA["destinations"][5]:
+    if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]] or pelaaja["round"] > 10:
         final_round()
     status()
     pelaajan_input = input(
-        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu, '{CF.MAGENTA}stay{CF.RESET},"
+        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu, '{CF.MAGENTA}stay{CF.RESET}' to stay and work,"
         f" '{CF.RED}exit{CF.RESET}' to quit game: ").lower().strip()
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
