@@ -486,7 +486,7 @@ def sql_select_5_top_players():
 
 
 # Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
-def hint(icao: str):
+def sql_hint(icao: str):
     sql = "select hint from hints "
     sql += f"where ident = '{icao}';"
 
@@ -507,18 +507,18 @@ def check_for_dist(locs, emissions: bool):
     return output if not emissions else output * 115
 
 
+# Määrittelee yksittäisen lennon hinnan
 def trip_price(start, dest):
     coords = sql_coordinate_query(start, dest)
     trip = check_for_dist(coords, False)
-    price = 100
-    price += trip / 15
-    return math.floor(price)
+    return math.floor(100 + trip / 15)
 
 
 def display_hint(current_location: str, can_advance: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
 
+    # hint_index on ROTAN listassa oleva numero, joka vastaa DEST_ICAOSSA maan ICAO-koodia
     if location < 10:
         hint_index = 1
     elif location < 20:
@@ -535,7 +535,7 @@ def display_hint(current_location: str, can_advance: bool):
     if not can_advance and hint_index != 5:
         hint_index -= 1
 
-    return hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
+    return sql_hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
 
 
 # Hakee SQL:stä listan mahdollisia lentokohteita ja printtaa ne pelaajalle luettavaksi.
@@ -602,14 +602,14 @@ def status():
         "Rumour for the Rat's next destination:\n" + "\x1B[3m" +
         f'"{display_hint(pelaaja["location"], pelaaja["can_advance"])}"' + "\x1B[0m" + "\n")
 
-    # Listaa pelaajalle mahdolliset
+    # Listaa pelaajalle mahdolliset lentokohteet
     print(f"{CF.YELLOW}{CB.BLACK}Possible flight locations:{CF.RESET}{CB.RESET}")
     possible_flight_locations(
         pelaaja["location"], pelaaja["can_advance"], True)
 #############################
 
 
-# Provides the user a quick guide during the game. The user can continue playing when user inputs "exit".
+# Tarjoaa apua ja pistetaulukoita pelaajalle, "return" vie takaisin päävalikkoon
 def help_menu():
     user_input_tips = {
         f'{CF.CYAN}Return{CF.RESET}': 'Continue the game.',
