@@ -66,7 +66,7 @@ DEST_ICAO = {
     55: "GCLP",  # Gran Canaria
 }
 
-OHJEET = (f"------------------------------\n"
+OHJEET = (f"------------------------------------------------------------------------------------------\n"
           f"Welcome to {CF.YELLOW}Chase The Rat{CF.RESET}! {CF.RED}This guide is not required, but may help you understand the game.{CF.RESET}\n\nYou'll need to enter an existing {CF.YELLOW}username{CF.RESET} "
           f"and a {CF.YELLOW}PIN-code{CF.RESET} to play with your user\n"
           f"OR you can create new {CF.YELLOW}username{CF.RESET} and a {CF.YELLOW}PIN-code{CF.RESET}.\n\n"
@@ -90,7 +90,8 @@ OHJEET = (f"------------------------------\n"
           f"\n{CF.GREEN}Your money{CF.RESET} * {CF.GREEN}rounds left{CF.RESET} + ({CF.YELLOW}Emission budget{CF.RESET} - {CF.RED}actual emissions{CF.RESET})"
           f"\n\nIf you don't find the Rat within the ten rounds: {CF.RED}you'll lose{CF.RESET}.\n"
           f"{CF.GREEN}You can play the tutorial after logging in to learn the basics!{CF.RESET}\n"
-          "------------------------------\n\n")
+          "---------------------------------------------------------------------------------------"
+          "---\n\n")
 
 POS_COINCIDENCES = [
     "Nice! You found a 100€ bill on the airport floor.\n(100e will be added to your account)",
@@ -364,6 +365,8 @@ def tutorial():
                 if tut_progress == "exit":
                     exit()
                 status()
+                print(f"\nType {CF.YELLOW}'?'{CF.RESET} to open Help menu, {CF.BLUE}'return'{CF.RESET} to return,"
+                      f" {CF.RED}'exit'{CF.RESET} to exit.")
                 tut_progress = input(
                     "\nThat's not quite it. Type in 'ESSA': ").strip().upper()
 
@@ -750,6 +753,7 @@ def travel_loop():  # THE main loop
         icao = input("\nWhere do you wish to fly?: ").strip().upper()
         if icao == "?":
             help_menu()
+            continue
         elif icao == "EXIT":  # käyttäjä voi poistua milloin haluaa
             exit()
         # käyttäjä voi palata edelliseen kohtaan (looppi päättyy)
@@ -816,15 +820,15 @@ def stay():
         clear()
         status()
         print(
-            f"\nYou have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n")
-        job = input("Choose a job to work at:\n\n"
-                    f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
-                    f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
-                    f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills "
-                    f"(No... you can't take them)\n\n"
-                    f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / "
-                    f"{CF.YELLOW}EXC{CF.RESET}\n\n"
-                    f"('{CF.RED}exit{CF.RESET}' leaves the game and '{CF.BLUE}return{CF.RESET}' returns to main menu): ").strip().upper()
+            f"\n+ You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n|")
+        job = input("| Choose a job to work at:\n|\n"
+                    f"| {CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
+                    f"| {CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
+                    f"| {CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills "
+                    f"(No... you can't take them)\n|\n"
+                    f"| Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / "
+                    f"{CF.YELLOW}EXC{CF.RESET}\n|\n"
+                    f"+ ('{CF.RED}exit{CF.RESET}' leaves the game and '{CF.BLUE}return{CF.RESET}' returns to main menu): ").strip().upper()
         if job == "?":  # käyttäjä avaa help-moduulin
             help_menu()
         elif job == "EXIT":  # Käyttäjä voi aina poistua ohjelmasta
@@ -934,6 +938,7 @@ elif instructions == "y":
 #########################################################################################
 ################################   KIRJAUTUMINEN   ######################################
 #########################################################################################
+clear()
 pelaajan_nimi = input(
     "\nPlease enter your username to log in: ").strip().upper()
 
