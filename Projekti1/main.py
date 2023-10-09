@@ -818,14 +818,14 @@ def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
         print(
-            f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
+            f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)} kilograms and you have {pelaaja['money']} € left.\n")
         sql_insert_score()
         input("Press Enter to continue...")
         sql_scores(True)
         exit()
     else:
         print(
-            f"{CF.RED}You lost!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
+            f"{CF.RED}You lost!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)} kilograms and you have {pelaaja['money']} € left.\n")
         input("Press Enter to continue...")
         sql_scores(True)
         exit()
