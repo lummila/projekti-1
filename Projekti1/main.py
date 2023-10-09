@@ -736,7 +736,7 @@ def travel_loop():  # THE main loop
 
             travel(icao, True)
 
-            input("\nPress enter to continue...\n")
+            input("\nPress enter to continue...")
             return icao
         #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
         elif icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index not in ROTTA["destinations"]:
