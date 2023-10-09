@@ -585,8 +585,8 @@ def status():
     loc = sql_destination(pelaaja['location'])
     print(f"\n+---------------------------------------------------------+\n"
           f"  Location: ({loc[0]}) {loc[1]}, {loc[2]}\n"
-          f"  Money: {locale.currency(pelaaja['money'])}\n"
-          f"  CO2 Emissions: {locale.str(pelaaja['emissions'])} g\n"
+          f"  Money: {pelaaja['money']} €\n"
+          f"  CO2 Emissions: {math.floor(pelaaja['emissions'] / 1000)} g\n"
           f"  Round: {pelaaja['round']}/10\n"
           f"+---------------------------------------------------------+\n")
 
