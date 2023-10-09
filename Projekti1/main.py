@@ -69,19 +69,20 @@ OHJEET = ("\n\n------------------------------\n"
           "------------------------------\n\n")
 
 POS_COINCIDENCES = [
-    "Nice! You found a 100€ bill on the airport floor.\n100e will be added to your account",
-    "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n50e will be added to your account",
-    "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n80e will be added to your account",
-    "There was a free seat at a more eco-friendly airplane.\n10kg was removed from your emissions!", "The airplane took a shorter route. Emissions were 10kg less than expected.\n10kg of emissions will be removed.",
+    "Nice! You found a 100€ bill on the airport floor.\n(100e will be added to your account)",
+    "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n(50€ will be added to your account)",
+    "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n(80€ will be added to your account)",
+    "There was a free seat at a more eco-friendly airplane.\n10kg was removed from your emissions!",
+    "The airplane took a shorter route. Emissions were 10kg less than expected.\n(10kg of emissions will be removed)",
     "Nothing of note has happened."
 ]
 
 NEG_COINCIDENCES = [
-    "The airport lost your luggage... You'll have to wait one night at the airport.\nOne turn is used",
-    "Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning. \nOne turn is used",
-    "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n100e will be removed from your account",
-    "Your luggage was over weight. The fee for extra kilos is 50 €.\n50 € will be removed from your account",
-    "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n10kg of emissions will be added",
+    "The airport lost your luggage... You'll have to wait one night at the airport.\n(One turn is used)",
+    "Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning. \n(One turn is used)",
+    "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n(100€ will be removed from your account)",
+    "Your luggage was over weight. The fee for extra kilos is 50 €.\n(50 € will be removed from your account)",
+    "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n(10kg of emissions will be added)",
     "Nothing of note has happened."
 ]
 
