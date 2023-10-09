@@ -584,7 +584,7 @@ def status():
 
     # Printtaa pelaajan sijainnin (flygari, maa, ICAO-koodi), rahat ja kierroksen/10
     loc = sql_destination(pelaaja['location'])
-    print(f"+---------------------------------------------------------+\n"
+    print(f"\n+---------------------------------------------------------+\n"
           f"  Location: ({loc[0]}) {loc[1]}, {loc[2]}\n"
           f"  Money: {locale.currency(pelaaja['money'])}\n"
           f"  CO2 Emissions: {locale.str(pelaaja['emissions'])} g\n"
@@ -627,7 +627,7 @@ def help_menu():
         elif help_input == "rules":  # Tulostaa pelin ohjeet
             clear()
             print(OHJEET)
-            input("\nPress Enter to continue...")
+            input("\nPress Enter to continue...\n")
             status()
             help_menu()
             return
@@ -736,7 +736,7 @@ def travel_loop():  # THE main loop
 
             travel(icao, True)
 
-            input("\nPress enter to continue...")
+            input("\nPress enter to continue...\n")
             return icao
         #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
         elif icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index not in ROTTA["destinations"]:
@@ -765,7 +765,7 @@ def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
         job = input("Choose a job to work at:\n\n"
                     f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
                     f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
-                    f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills (No... you can't take them\n\n"
+                    f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills (No... you can't take them)\n\n"
                     f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / {CF.YELLOW}EXC{CF.RESET}\n\n").strip().upper()
         if job == "?":  # käyttäjä avaa help-moduulin
             help_menu()
