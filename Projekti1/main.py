@@ -1,13 +1,11 @@
 import random
 import math
 import os
-import locale
 import mysql.connector
 from geopy import distance
 from colorama import Fore as CF, Back as CB, Style as CS
 
 os.system('cls')
-locale.setlocale(locale.LC_ALL, 'fi-FI')
 
 DEST_ICAO = {
     1: "EFHK",  # Helsinki
@@ -241,7 +239,7 @@ def sql_scores(leaderboard: bool):
         print("+----------------------------------------------------+")
         for entry in result:
             print(
-                f"  {locale.str(entry[0])}\t\t{entry[1]}")
+                f"  {entry[0]}\t\t{entry[1]}")
         print("+----------------------------------------------------+")
     else:
         print("+----------------------------------------------------+")
@@ -249,7 +247,7 @@ def sql_scores(leaderboard: bool):
         print("+----------------------------------------------------+")
         for entry in result:
             print(
-                f"  {locale.str(entry[0])}")
+                f"  {entry[0]}")
         print("+----------------------------------------------------+")
 
     input("\nPress Enter to continue...")
