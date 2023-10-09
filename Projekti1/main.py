@@ -1,13 +1,11 @@
 import random
 import math
 import os
-import locale
 import mysql.connector
 from geopy import distance
 from colorama import Fore as CF, Back as CB, Style as CS
 
 os.system('cls')
-locale.setlocale(locale.LC_ALL, 'fi-FI')
 
 DEST_ICAO = {
     1: "EFHK",  # Helsinki
@@ -33,8 +31,8 @@ DEST_ICAO = {
     45: "EIDW",  # Irlanti
     51: "LEBL",  # Espanja (HUOM Viides kierros)
     52: "LPPT",  # Portugali
-    53: "GCTS",  # Tenerife
-    54: "GCFV",  # Fuerteventure
+    53: "GMMX",  # Marokko
+    54: "HECA",  # Egypti
     55: "GCLP",  # Gran Canaria
 }
 
@@ -236,7 +234,7 @@ def sql_scores(leaderboard: bool):
         print("+----------------------------------------------------+")
         for entry in result:
             print(
-                f"  {locale.str(entry[0])}\t\t{entry[1]}")
+                f"  {entry[0]}\t\t{entry[1]}")
         print("+----------------------------------------------------+")
     else:
         print("+----------------------------------------------------+")
@@ -244,7 +242,7 @@ def sql_scores(leaderboard: bool):
         print("+----------------------------------------------------+")
         for entry in result:
             print(
-                f"  {locale.str(entry[0])}")
+                f"  {entry[0]}")
         print("+----------------------------------------------------+")
 
     input("\nPress Enter to continue...")
@@ -882,7 +880,7 @@ elif instructions == "y":
 
 #############################
 # LOGIN
-kirjautunut = login(input("Please enter your username to log in: "))
+kirjautunut = login(input("\nPlease enter your username to log in: "))
 # Jos kirjautumisfunktio palauttaa Falsen (ei onnistunut) ja yritetään uudestaan
 while not kirjautunut:
     kirjautunut = login(input("Please enter your username to log in: "))
