@@ -224,7 +224,7 @@ def sql_scores(leaderboard: bool):
         sql += "order by points desc limit 10;"
     else:  # Aktiivisen pelaajan parhaat pisteet
         sql = f"select points from goal where screen_name = '{pelaaja['name']}' "
-        sql += "order by points desc;"
+        sql += "order by points desc limit 10;"
 
     _, result = sql_execute(sql)
 
@@ -252,8 +252,6 @@ def sql_scores(leaderboard: bool):
         print("+----------------------------------------------------+")
 
     input("\nPress Enter to continue...")
-    status()
-    help_menu()  # Palaa takaisin apuvalikkoon
 
     return True
 
@@ -507,7 +505,7 @@ def trip_price(start, dest):
     coords = sql_coordinate_query(start, dest)
     trip = check_for_dist(coords, False)
     price = 100
-    price += trip / 10
+    price += trip / 15
     return math.floor(price)
 
 
@@ -527,7 +525,7 @@ def display_hint(current_location: str, can_advance: bool):
     elif location < 50:
         hint_index = 5
     else:
-        hint_index = 6
+        hint_index = 5
 
     if not can_advance:
         hint_index -= 1
@@ -633,9 +631,13 @@ def help_menu():
             return
         elif help_input == "leaderboard":  # Tulostaa top 10 pisteet
             sql_scores(True)
+            status()
+            help_menu()  # Palaa takaisin apuvalikkoon
             return
         elif help_input == "personal":  # Tulostaa omat pisteet
             sql_scores(False)
+            status()
+            help_menu()  # Palaa takaisin apuvalikkoon
             return
         else:
             # Tuntematon komento
@@ -691,12 +693,18 @@ def travel(icao: str, right: bool):
     price = trip_price(pelaaja["location"], icao)
 
     dest = sql_destination(icao)
-    print(
-        f"{CF.GREEN}You have travelled to the {'correct' if right else 'wrong'} airport:{CF.RESET} {dest[1]}.")
+
+    if right:
+        print(
+            f"{CF.GREEN}You have travelled to the correct airport:{CF.RESET} {dest[1]}.")
+        pelaaja["can_advance"] = True
+    else:
+        print(
+            f"{CF.RED}You have travelled to the wrong airport:{CF.RESET} {dest[1]}.")
+        pelaaja["can_advance"] = False
     # Vähentää pelaajan rahoista matkan, päivittää käytetyt kierrokset ja pelaajan tilastot, pelaaja siirtyy seuravaalle tasolle
     pelaaja["money"] -= price
     pelaaja["round"] += 1
-    pelaaja["can_advance"] = True
     pelaaja["coincidence"] = coincidence(True)
     pelaaja["emissions"] += emissions
 
@@ -717,7 +725,11 @@ def travel_loop():  # THE main loop
             return
 
         # ICAO-koodin tunnusnumero DEST_ICAOSSA
-        icao_index = [i for i in DEST_ICAO if DEST_ICAO[i] == icao][0]
+        if icao in DEST_ICAO.values():
+            icao_index = [i for i in DEST_ICAO if DEST_ICAO[i] == icao][0]
+        else:
+            input("Invalid ICAO code. Press Enter to continue.")
+            continue
         # selvittää lennon hinnan hinta-funktion avulla
         price = trip_price(pelaaja["location"], icao)
 
@@ -807,11 +819,13 @@ def final_round():
         print(
             f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
         sql_insert_score()
+        input("Press Enter to continue...")
         sql_scores(True)
         exit()
     else:
         print(
             f"{CF.RED}You lost!{CF.RESET} Your emissions were {locale.str(pelaaja['emissions'])} grams and you have {locale.currency(pelaaja['money'])} left.\n")
+        input("Press Enter to continue...")
         sql_scores(True)
         exit()
 
@@ -892,19 +906,19 @@ elif play_tutorial == "y":
 # main looppi
 pelaajan_input = ""
 while pelaajan_input != "exit":
-    if pelaaja["round"] == 10:
+    if pelaaja["round"] == 10 or pelaaja["location"] == ROTTA["destinations"][5]:
         final_round()
     status()
     pelaajan_input = input(
-        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu,"
+        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu, '{CF.MAGENTA}stay{CF.RESET},"
         f" '{CF.RED}exit{CF.RESET}' to quit game: ").lower().strip()
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
         help_menu()
     elif pelaajan_input == "fly":  # pelaajan syöte käynnistää lento-funktion
-        travel = travel_loop()
-        if travel:
-            pelaaja["location"] = travel
+        traveled = travel_loop()
+        if traveled:
+            pelaaja["location"] = traveled
     elif pelaajan_input == "stay":
         stay()
 
