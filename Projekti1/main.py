@@ -1,3 +1,24 @@
+'''
+Asioiden järjestys koodissa:
+1.  Importit
+2.  HUOM: Jos tietokantahallintajärjestelmässäsi on salasana, KIRJAA SE admin_root_name -muuttujaan!
+3.  Muuttumattomat DEST_ICAO, OHJEET ja sattumat
+4.  clear() ja kaikki SQL-hakuja tekevät funktiot
+5.  tutorial()
+6.  generate_rotta()
+7.  Matkojen etäisyys- ja hintafunktiot
+8.  Funktiot mahdollisille lentokohteille ja vinkeille
+9.  status() pelaajan tilanteen tulostamiselle
+10. help_menu() apuvalikolle
+11. coincidence() sattumien arpomiselle
+12. Matkustamisessa käytettävät funktiot
+13. stay() pelaajan rahankeruuta varten
+14. final_round() pelin päättämistä varten
+15. Pelin aloitusfunktio, joka määrittää rotan ja pelaajan tiedot
+16. SQL-yhteys
+17. 
+'''
+
 import random
 import math
 import os
@@ -6,6 +27,11 @@ from geopy import distance
 from colorama import Fore as CF, Back as CB
 
 os.system('cls')
+
+#############################
+# VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
+admin_root_name = "metropolia"
+#############################
 
 DEST_ICAO = {
     1: "EFHK",  # Helsinki
@@ -86,6 +112,225 @@ NEG_COINCIDENCES = [
 ]
 
 
+def clear():  # tyhjentää konsolin tarpeettomasta tekstistä joka printattiin aiemmin
+    return os.system('cls')
+
+
+def sql_scores(leaderboard: bool):
+    if leaderboard:  # Top 10 kaikkien pelaajien pisteet
+        sql = "select points, screen_name from goal "
+        sql += "order by points desc limit 10;"
+    else:  # Aktiivisen pelaajan parhaat pisteet
+        sql = f"select points from goal where screen_name = '{pelaaja['name']}' "
+        sql += "order by points desc limit 10;"
+
+    _, result = sql_execute(sql, True)
+
+    if not result:
+        print("ERROR fetching scores in sql_scores()")
+        return False
+
+    clear()
+
+    if leaderboard:
+        print("+----------------------------------------------------+")
+        print("| The leaderboard of top 10 scores in Chase the Rat: |")
+        print("+----------------------------------------------------+")
+        for entry in result:
+            print(
+                f"  {entry[0]}\t\t{entry[1]}")
+        print("+----------------------------------------------------+")
+    else:
+        print("+----------------------------------------------------+")
+        print("|            Your personal best scores:              |")
+        print("+----------------------------------------------------+")
+        for entry in result:
+            print(
+                f"  {entry[0]}")
+        print("+----------------------------------------------------+")
+
+    input("\nPress Enter to continue...")
+
+    return True
+
+
+# Ensin hakee pelaajan id-numeron, sitten tallentaa goaliin pelaajan lasketut pisteet
+def sql_insert_score():
+    sql = f"select id from game where screen_name = '{pelaaja['name']}';"
+
+    _, result = sql_execute(sql, True)
+    if not result:
+        print("ERROR fetching player id in sql_insert_score()")
+        return False
+
+    player_id = result[0][0]
+    player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
+                              < 10 else 1) + (ROTTA["emissions"] - pelaaja["emissions"]) / 1000))
+
+    sql = "insert into goal (id, screen_name, points) "
+    sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
+
+    cursor = sql_execute(sql, False)
+    if cursor.rowcount < 1:
+        print("ERROR inserting player record in sql_insert_score()")
+        return False
+
+    return True
+
+
+# Lyhennys sql:n kanssa kommunikoinnissa
+def sql_execute(code: str, result: bool):
+    cursor = connection.cursor()
+    cursor.execute(code)
+    if result:
+        result = cursor.fetchall()
+        return cursor, result
+    else:
+        return cursor
+
+
+# Tietokantaan rekisteröityminen ja kirjautuminen
+def sql_login(username: str):
+    if username.lower() == "exit":
+        exit()
+
+    sql = "select screen_name from game "
+    sql += f"where screen_name = '{username}';"
+
+    cursor, result = sql_execute(sql, True)
+
+    #########################
+    #########################
+    # Jos käyttäjänimeä ei löydy tietokannasta game -> screen_name
+    if not result:
+        print("User not found, create a new user? You can also type 'exit' to exit game. (Y = yes / N = no)")
+        login_input = input("Y / N ").lower()
+
+        while login_input not in ["y", "n", "exit"]:
+            login_input = input(
+                f"{CF.RED}Invalid command, enter Y, N or exit:{CF.RESET} ").lower()
+
+        if login_input == "exit":
+            exit()  # Ohjelma sulkeutuu
+        elif login_input == "n":
+            return False  # EI LUODA UUTTA KÄYTTÄJÄÄ, PELI EI ETENE
+        # LUODAAN UUSI KÄYTTÄJÄ
+        elif login_input == "y":
+            new_PIN = input(
+                "Enter your new 4-digit PIN code: ")
+
+            # Jos PIN-koodi ei ole validi
+            while len(new_PIN) != 4 or not new_PIN.isdigit():
+                # Pitää muistaa aina päästää käyttäjä pois
+                if new_PIN == "exit":
+                    exit()
+                else:
+                    new_PIN = input(
+                        f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
+
+            # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
+            sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
+            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
+
+            cursor.reset()
+            cursor.execute(sql_new_user)
+
+            new_user = input(
+                "User created! You can now log in: ").upper()
+
+            if new_user == "EXIT":
+                exit()
+
+            return sql_login(new_user)
+    # UUDEN KÄYTTÄJÄN LUONTI LOPPUU
+    #########################
+    #########################
+    else:
+        old_user_PIN = input("Input your 4-digit PIN code: ")
+
+        # Käyttäjän pitää aina päästä ulos
+        if old_user_PIN.upper() == "EXIT":
+            exit()
+
+        old_user_PIN = int(old_user_PIN)
+
+        sql_old_PIN = "select screen_name, passcode from game "
+        sql_old_PIN += f"where screen_name = '{username}' and passcode = {old_user_PIN};"
+
+        cursor, result = sql_execute(sql_old_PIN, True)
+
+        if not result:
+            print(f"{CF.RED}Invalid username or PIN code.{CF.RESET}")
+            return False
+
+        #####################
+        #####################
+        # Onnistunut sisäänkirjautuminen!
+        if username == result[0][0] and old_user_PIN == result[0][1]:
+
+            pelaaja["name"] = result[0][0]
+            print("Successfully logged in!")
+            return True
+        else:
+            print(f"{CF.RED}Something went wrong with login credentials...{CF.RESET}")
+            return False
+
+
+# Hakee tietokannasta lentokentän ja maan nimen, ja ICAO-koodin
+def sql_destination(icao: str):
+    sql = "select airport.name, country.name, airport.ident from country, airport "
+    sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
+
+    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
+    cursor, result = sql_execute(sql, True)
+
+    if cursor.rowcount <= 0:  # Ei tuloksia
+        print(f"{CF.RED}Something went wrong. Check the ICAO code.{CF.RESET}")
+        return -1
+    else:
+        # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
+        # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
+        return [result[0][2], result[0][0], result[0][1]]
+
+
+# Noutaa tietokannasta koordinaatit lähtö- ja saapumispaikkaan
+def sql_coordinate_query(start: str, dest: str):
+    location_list = []
+
+    # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
+    for x in range(2):
+        sql = "select longitude_deg, latitude_deg from airport "
+        # Jos x on 0, kyseessä on ensimmäinen haku, eli käytetään start-muuttujaa, ja toisella kerralla dest-muuttujaa.
+        sql += f"where ident = '{start if x == 0 else dest}';"
+
+        # SQL:n käyttö
+        cursor, result = sql_execute(sql, True)
+
+        if cursor.rowcount <= 0:
+            print(
+                f"{CF.RED}ERROR calculating coordinates in sql_coordinate_query(){CF.RESET}")
+            return -1
+        else:
+            # Lisätään locationList-listaan tuple, jossa koordinaatit
+            location_list.append(result[0])
+    # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
+    return location_list
+
+
+# Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
+def sql_hint(icao: str):
+    sql = "select hint from hints "
+    sql += f"where ident = '{icao}';"
+
+    _, result = sql_execute(sql, True)
+
+    if not result:
+        return f"{CF.RED}ERROR fetching hint from hints!{CF.RESET}"
+    else:
+        return result[0][0]
+
+
+# Pelaajan orientointi pelaamiseen
 def tutorial():
     # Muuttujat pelaajan inputia varten ohjeistuksen aikana.
     learn_fly, learn_help_menu, learn_work = False, False, False,
@@ -226,175 +471,7 @@ def tutorial():
     progress()
 
 
-def sql_scores(leaderboard: bool):
-    if leaderboard:  # Top 10 kaikkien pelaajien pisteet
-        sql = "select points, screen_name from goal "
-        sql += "order by points desc limit 10;"
-    else:  # Aktiivisen pelaajan parhaat pisteet
-        sql = f"select points from goal where screen_name = '{pelaaja['name']}' "
-        sql += "order by points desc limit 10;"
-
-    _, result = sql_execute(sql, True)
-
-    if not result:
-        print("ERROR fetching scores in sql_scores()")
-        return False
-
-    clear()
-
-    if leaderboard:
-        print("+----------------------------------------------------+")
-        print("| The leaderboard of top 10 scores in Chase the Rat: |")
-        print("+----------------------------------------------------+")
-        for entry in result:
-            print(
-                f"  {entry[0]}\t\t{entry[1]}")
-        print("+----------------------------------------------------+")
-    else:
-        print("+----------------------------------------------------+")
-        print("|            Your personal best scores:              |")
-        print("+----------------------------------------------------+")
-        for entry in result:
-            print(
-                f"  {entry[0]}")
-        print("+----------------------------------------------------+")
-
-    input("\nPress Enter to continue...")
-
-    return True
-
-
-# Ensin hakee pelaajan id-numeron, sitten tallentaa goaliin pelaajan lasketut pisteet
-def sql_insert_score():
-    sql = f"select id from game where screen_name = '{pelaaja['name']}';"
-
-    _, result = sql_execute(sql, True)
-    if not result:
-        print("ERROR fetching player id in sql_insert_score()")
-        return False
-
-    player_id = result[0][0]
-    player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
-                              < 10 else 1) + (ROTTA["emissions"] - pelaaja["emissions"]) / 1000))
-
-    sql = "insert into goal (id, screen_name, points) "
-    sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
-
-    cursor = sql_execute(sql, False)
-    if cursor.rowcount < 1:
-        print("ERROR inserting player record in sql_insert_score()")
-        return False
-
-    return True
-
-
-def clear():  # tyhjentää konsolin tarpeettomasta tekstistä joka printattiin aiemmin
-    return os.system('cls')
-
-
-# Lyhennys sql:n kanssa kommunikoinnissa
-def sql_execute(code: str, result: bool):
-    cursor = connection.cursor()
-    cursor.execute(code)
-    if result:
-        result = cursor.fetchall()
-        return cursor, result
-    else:
-        return cursor
-
-
-def login(username: str):
-    if username.lower() == "exit":
-        exit()
-
-    sql = "select screen_name from game "
-    sql += f"where screen_name = '{username}';"
-
-    cursor, result = sql_execute(sql, True)
-
-    #########################
-    #########################
-    # Jos käyttäjänimeä ei löydy tietokannasta game -> screen_name
-    if not result:
-        print("User not found, create a new user? You can also type 'exit' to exit game. (Y = yes / N = no)")
-        login_input = input("Y / N ").lower()
-
-        while login_input not in ["y", "n", "exit"]:
-            login_input = input(
-                f"{CF.RED}Invalid command, enter Y, N or exit:{CF.RESET} ").lower()
-
-        if login_input == "exit":
-            exit()  # Ohjelma sulkeutuu
-        elif login_input == "n":
-            return False  # EI LUODA UUTTA KÄYTTÄJÄÄ, PELI EI ETENE
-        # LUODAAN UUSI KÄYTTÄJÄ
-        elif login_input == "y":
-            new_PIN = input(
-                "Enter your new 4-digit PIN code: ")
-
-            # Jos PIN-koodi ei ole validi
-            while len(new_PIN) != 4 or not new_PIN.isdigit():
-                # Pitää muistaa aina päästää käyttäjä pois
-                if new_PIN == "exit":
-                    exit()
-                else:
-                    new_PIN = input(
-                        f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
-
-            # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
-            sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
-            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
-
-            cursor.reset()
-            cursor.execute(sql_new_user)
-
-            new_user = input(
-                "User created! You can now log in: ").upper()
-
-            if new_user == "EXIT":
-                exit()
-
-            return login(new_user)
-    # UUDEN KÄYTTÄJÄN LUONTI LOPPUU
-    #########################
-    #########################
-    else:
-        old_user_PIN = input("Input your 4-digit PIN code: ")
-
-        # Käyttäjän pitää aina päästä ulos
-        if old_user_PIN.upper() == "EXIT":
-            exit()
-
-        old_user_PIN = int(old_user_PIN)
-
-        sql_old_PIN = "select screen_name, passcode from game "
-        sql_old_PIN += f"where screen_name = '{username}' and passcode = {old_user_PIN};"
-
-        cursor, result = sql_execute(sql_old_PIN, True)
-
-        if not result:
-            print(f"{CF.RED}Invalid username or PIN code.{CF.RESET}")
-            return False
-
-        #####################
-        #####################
-        # Onnistunut sisäänkirjautuminen!
-        if username == result[0][0] and old_user_PIN == result[0][1]:
-
-            pelaaja["name"] = result[0][0]
-            print("Successfully logged in!")
-            return True
-        else:
-            print(f"{CF.RED}Something went wrong with login credentials...{CF.RESET}")
-            return False
-
-# Pelaajan arvojen muuttamisfunktiot
-
-# Sattumafunktiot
-
-# Lentokentälle saapuminen -funktio
-
-
+# Funktio rotan tietojen luomiselle
 def generate_rotta():
     # ROTAN KOHTEET
     output = [1]
@@ -436,68 +513,6 @@ def generate_rotta():
     return output, math.floor(total_grams), math.floor(total_price)
 
 
-def sql_destination(icao: str):
-    sql = "select airport.name, country.name, airport.ident from country, airport "
-    sql += f"where country.iso_country = airport.iso_country and airport.ident = '{icao}';"
-
-    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    cursor, result = sql_execute(sql, True)
-
-    if cursor.rowcount <= 0:  # Ei tuloksia
-        print(f"{CF.RED}Something went wrong. Check the ICAO code.{CF.RESET}")
-        return -1
-    else:
-        # result on lista, jossa on tuple, jonka ensimmäinen elementti on haettu maan nimi.
-        # result = [(Finland,)] / result[0] = (Finland,) / result[0][0] = Finland
-        return [result[0][2], result[0][0], result[0][1]]
-
-
-def sql_coordinate_query(start: str, dest: str):
-    location_list = []
-
-    # Kaksi eri hakua, aloitusmaan ja päämäärän etäisyyden selvittämiseksi.
-    for x in range(2):
-        sql = "select longitude_deg, latitude_deg from airport "
-        # Jos x on 0, kyseessä on ensimmäinen haku, eli käytetään start-muuttujaa, ja toisella kerralla dest-muuttujaa.
-        sql += f"where ident = '{start if x == 0 else dest}';"
-
-        # SQL:n käyttö
-        cursor, result = sql_execute(sql, True)
-
-        if cursor.rowcount <= 0:
-            print(
-                f"{CF.RED}ERROR calculating coordinates in sql_coordinate_query(){CF.RESET}")
-            return -1
-        else:
-            # Lisätään locationList-listaan tuple, jossa koordinaatit
-            location_list.append(result[0])
-    # Palauttaa listan, jossa kahdet koordinaatit tuplemuodossa
-    return location_list
-
-
-def sql_select_5_top_players():
-    sql = f"select money, screen_name from game order by money desc limit 5;"
-    # Erotetaan sqlPointerin osoitin ja tulokset käyttöä varten
-    _, result = sql_execute(sql, True)
-    print(f"Here are the top 5 player scores")
-    for i in range(0, 5):
-        print(f"{i+1}. Points: {result[i][0]} Screen name: {result[i][1]}")
-    return
-
-
-# Ottaa parametriksi ICAO-tekstin, ja hakee tietokannasta oikean vihjeen. Palauttaa vihjeen tekstin.
-def sql_hint(icao: str):
-    sql = "select hint from hints "
-    sql += f"where ident = '{icao}';"
-
-    _, result = sql_execute(sql, True)
-
-    if not result:
-        return f"{CF.RED}ERROR fetching hint from hints!{CF.RESET}"
-    else:
-        return result[0][0]
-
-
 # Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja
 # booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
 def check_for_dist(locs, emissions: bool):
@@ -514,6 +529,7 @@ def trip_price(start, dest):
     return math.floor(100 + trip / 15)
 
 
+# Palauttaa pelissä seuraavan tason vihjeen
 def display_hint(current_location: str, can_advance: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
@@ -538,7 +554,7 @@ def display_hint(current_location: str, can_advance: bool):
     return sql_hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
 
 
-# Hakee SQL:stä listan mahdollisia lentokohteita ja printtaa ne pelaajalle luettavaksi.
+# Hakee SQL:stä listan mahdollisia lentokohteita ja palauttaa näistä listan. Voi myös printtaa.
 def possible_flight_locations(current_location: str, can_advance: bool, prints: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
@@ -655,6 +671,7 @@ def help_menu():
             input(f"\n{CF.RED}Unknown command.{CF.RESET} Press Enter to continue.")
 
 
+# Arpoo pelaajalle sattuman, joka voi tapahtua lentäessä.
 def coincidence(positive: bool):
     weights = [80, 20] if positive else [20, 80]
     coincidences_list = random.choices([POS_COINCIDENCES, NEG_COINCIDENCES],
@@ -693,6 +710,7 @@ def coincidence(positive: bool):
     return choice
 
 
+# Päivittää tietoja, kun tehdään onnistunut lento.
 def travel(icao: str, right: bool):
     # Emissionsiin lasketaan lennon päästöt
     emissions = math.floor(check_for_dist(
@@ -718,6 +736,7 @@ def travel(icao: str, right: bool):
     pelaaja["emissions"] += emissions
 
 
+# Lentovalikko
 def travel_loop():  # THE main loop
     while True:  # kysyy käyttäjältä minne hän haluaa lentää
         clear()
@@ -741,14 +760,16 @@ def travel_loop():  # THE main loop
             continue
         # selvittää lennon hinnan hinta-funktion avulla
         price = trip_price(pelaaja["location"], icao)
+        # Lista pelaajalle mahdollisista lentokohteista
+        possibilities = possible_flight_locations(
+            pelaaja["location"], pelaaja["can_advance"], False)
 
         # käyttäjä syöttää vahingossa nykyisen sijaintinsa uuden kohteen sijaan --> uudelleen
         if icao == pelaaja["location"]:
             input("You're already in this location. Press Enter to continue.")
             continue
         #  pelaaja valitsee oikean lentokentän (rotan aikaisempi olinpaikka)
-        if (icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and
-                icao_index in ROTTA["destinations"]):
+        if icao in possibilities and icao_index in ROTTA["destinations"]:
 
             # jos pelaajalla ei ole varaa lentoon, joutuu pelaaja jäämään kentälle
             if pelaaja["money"] < price:
@@ -761,8 +782,7 @@ def travel_loop():  # THE main loop
             input("\nPress enter to continue...")
             return icao
         #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
-        elif (icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and
-              icao_index not in ROTTA["destinations"]):
+        elif icao in possibilities and icao_index not in ROTTA["destinations"]:
 
             price = trip_price(pelaaja["location"], icao)
 
@@ -780,7 +800,14 @@ def travel_loop():  # THE main loop
                 f"{CF.RED}\nInvalid input, please try again.{CF.RESET} Press Enter to continue.")
 
 
-def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
+# Pelaaja jää lentokentälle ansaitakseen rahaa
+def stay():
+
+    def work():
+        pelaaja["money"] += 175
+        pelaaja["round"] += 1
+        input("Press Enter to continue...")
+
     while True:
         clear()
         status()
@@ -805,30 +832,24 @@ def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
             # Pelaajan ansaitsemat rahat päivitetään pelin tietoihin
             print(
                 f"\nYou decided to work at the {CF.RED}Burger Shack{CF.RESET}! Have some money!")
-            pelaaja["money"] += 175
-            pelaaja["round"] += 1
-            input("Press Enter to continue...")
+            work()
             return True
         elif job == "FLO":  # työvaihtoehto 2
             print(
                 f"\nYou decided to go and {CF.GREEN}wrap some flowers{CF.RESET}! Here's some cash to keep you going!")
-            pelaaja["money"] += 175
-            pelaaja["round"] += 1
-            input("Press Enter to continue...")
+            work()
             return True
         elif job == "EXC":  # työvaihtoehto 3
             print(
                 f"\nWe will trust that you {CF.YELLOW}count the bills{CF.RESET} correctly! Take some money!")
-            pelaaja["money"] += 175
-            pelaaja["round"] += 1
-            input("Press Enter to continue...")
+            work()
             return True
         else:  # käyttäjä on nakkisormi
             print(f"{CF.RED}\nInvalid input, please try again.{CF.RESET}")
             input("Press Enter to continue...")
 
 
-# Final Round päättää pelin ja pyörittää top 10 players.
+# Final Round päättää pelin ja pyörittää top 10 players joka tapauksessa.
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
         print(f"\t+----------+\n"
@@ -876,25 +897,24 @@ def game_start():
     }
 
     return rotta_create, player_create
-# --------------------------------------
-
-
-#############################
+#########################################################################################
+############################                        #####################################
+############################   ALOITETAAN RUNTIME   #####################################
+############################                        #####################################
+#########################################################################################
 # SQL-yhteys
 connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
     database="velkajahti",
-    user="vj_admin",
-    password="velkajahti",
+    user="root",
+    password=admin_root_name,
     autocommit=True
 )
-#############################
-
+#########################################################################################
 # Pelaajan ja rotan init:
 ROTTA, pelaaja = game_start()
-
-#############################
+#########################################################################################
 # Ohjeet
 instructions = input(
     f"Do you wish to read the instructions? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N{CF.RESET}): ").lower()
@@ -905,38 +925,50 @@ elif instructions == "y":
     clear()
     print(OHJEET)
     input("Press Enter to continue...")
-#############################
-
-#############################
-# LOGIN
+#########################################################################################
+################################   KIRJAUTUMINEN   ######################################
+#########################################################################################
 pelaajan_nimi = input(
     "\nPlease enter your username to log in: ").strip().upper()
+
 # Liian pienet nimet ei vetele
 while len(pelaajan_nimi) < 3:
     pelaajan_nimi = input(
         f"{CF.YELLOW}Please enter a username longer than 2 letters:{CF.RESET} ").strip().upper()
+
 # Kirjaudutaan / rekisteröidytään, ja jos
-kirjautunut = login(pelaajan_nimi)
+kirjautunut = sql_login(pelaajan_nimi)
+
 # Jos kirjautumisfunktio palauttaa Falsen (ei onnistunut) ja yritetään uudestaan
 while not kirjautunut:
     pelaajan_nimi = input(
         "Please enter your username to log in: ").strip().upper()
-    kirjautunut = login(pelaajan_nimi)
+    kirjautunut = sql_login(pelaajan_nimi)
 input("Press Enter to continue...")
-#############################
+#########################################################################################
+###################################   TUTORIAL   ########################################
+#########################################################################################
 # Tutorial
 play_tutorial = input(
     f"\nPlay the {CF.MAGENTA}tutorial{CF.RESET} to learn to play the game? ({CF.GREEN}Y{CF.RESET} / "
     f"{CF.RED}N{CF.RESET}): ").lower()
+
+# Pelaajan poispäästäminen
 if play_tutorial == "exit":
     exit()
+
+# Päästetään pelaaja pelaamaan tutorial
 elif play_tutorial == "y":
     tutorial()
     # Pelaaja ja Rotta pitää resettaa uudelleen pelikokemuksen takia.
     ROTTA, pelaaja = game_start()
     pelaaja["name"] = pelaajan_nimi
     clear()
-
+#########################################################################################
+###############################                     #####################################
+###############################   PELIN PÄÄLOOPPI   #####################################
+###############################                     #####################################
+#########################################################################################
 # main looppi
 pelaajan_input = ""
 while pelaajan_input != "exit":
@@ -962,3 +994,5 @@ while pelaajan_input != "exit":
 
 else:
     exit()
+#########################################################################################
+#########################################################################################
