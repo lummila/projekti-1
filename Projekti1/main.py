@@ -3,7 +3,7 @@ import math
 import os
 import mysql.connector
 from geopy import distance
-from colorama import Fore as CF, Back as CB, Style as CS
+from colorama import Fore as CF, Back as CB
 
 os.system('cls')
 
@@ -64,8 +64,10 @@ OHJEET = ("\n\n------------------------------\n"
 
 POS_COINCIDENCES = [
     "Nice! You found a 100€ bill on the airport floor.\n(100e will be added to your account)",
-    "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n(50€ will be added to your account)",
-    "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n(80€ will be added to your account)",
+    "You were helpful to a lost elderly. For the kind act he rewarded you with a 50€ bill!\n(50€ will be added to "
+    "your account)",
+    "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n(80€ will be "
+    "added to your account)",
     "There was a free seat at a more eco-friendly airplane.\n10kg was removed from your emissions!",
     "The airplane took a shorter route. Emissions were 10kg less than expected.\n(10kg of emissions will be removed)",
     "Nothing of note has happened."
@@ -73,10 +75,13 @@ POS_COINCIDENCES = [
 
 NEG_COINCIDENCES = [
     "The airport lost your luggage... You'll have to wait one night at the airport.\n(One turn is used)",
-    "Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning. \n(One turn is used)",
-    "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n(100€ will be removed from your account)",
+    "Your flight was canceled, because of a raging storm. Your replacing flight leaves tomorrow morning. \n(One turn "
+    "is used)",
+    "You checked-in late to your flight. You'll have to pay a 100€ fee for the manual check-in.\n(100€ will be "
+    "removed from your account)",
     "Your luggage was over weight. The fee for extra kilos is 50 €.\n(50 € will be removed from your account)",
-    "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n(10kg of emissions will be added)",
+    "The aircraft underestimated the flight's emissions. The emissions were 10kg higher than expected.\n(10kg of "
+    "emissions will be added)",
     "Nothing of note has happened."
 ]
 
@@ -88,7 +93,6 @@ def tutorial():
     # Alifunktio etenemistä varten.
     def progress():
         status()
-        tut_progress = None
 
         # Opetetaan pelaajalle lentämistä.
         if learn_fly:
@@ -158,37 +162,44 @@ def tutorial():
     progress()
 
     pelaaja["coincidence"] = (f"{CF.GREEN}Above me you can see information about your situation in\n"
-                              f"in a pretty box. It displays your current {CF.YELLOW}location{CF.GREEN}, amount of {CF.YELLOW}money{CF.GREEN},\n"
+                              f"in a pretty box. It displays your current {CF.YELLOW}location{CF.GREEN}, amount of"
+                              f"{CF.YELLOW}money{CF.GREEN},\n"
                               f"flight {CF.YELLOW}emissions{CF.GREEN} and game {CF.YELLOW}round{CF.GREEN}.{CF.RESET}")
     progress()
 
     pelaaja["coincidence"] = (f"{CF.GREEN}You change locations by flying between airports. To fly,\n"
-                              f"you need {CF.YELLOW}money{CF.GREEN}. When you fly, you amass CO2 {CF.YELLOW}emissions{CF.GREEN} from the flights.\n"
+                              f"you need {CF.YELLOW}money{CF.GREEN}. When you fly, you amass CO2 {CF.YELLOW}emissions"
+                              f"{CF.GREEN} from the flights.\n"
                               f"This affects your end score negatively, so try to avoid meaningless\n"
-                              f"flying! You have ten {CF.YELLOW}rounds{CF.GREEN} to catch the Rat, or you fail the game.\n"
+                              f"flying! You have ten {CF.YELLOW}rounds{CF.GREEN} to catch the Rat, or you fail the "
+                              f"game.\n"
                               f"Each action, for example flying, takes a round.{CF.RESET}")
     progress()
 
-    pelaaja["coincidence"] = (f"{CF.GREEN}Below you can find the {CF.YELLOW}hint for your next destination{CF.GREEN}, and at\n"
+    pelaaja["coincidence"] = (f"{CF.GREEN}Below you can find the {CF.YELLOW}hint for your next destination{CF.GREEN}, "
+                              f"and at\n"
                               f"the bottom are the {CF.YELLOW}possible airports{CF.GREEN} for you to fly to.\n"
                               f"The hint guides you to the right airport so you can catch\n"
                               f"the Rat as soon as possible.{CF.RESET}")
     progress()
 
     pelaaja["coincidence"] = (f"{CF.GREEN}But just showing it to you is lame, so let's fly! Type\n"
-                              f"'{CF.BLUE}fly{CF.GREEN}' to open the flight menu, and fly to Stockholm-Arlanda Airport\n"
+                              f"'{CF.BLUE}fly{CF.GREEN}' to open the flight menu, and fly to Stockholm-Arlanda "
+                              f"Airport\n"
                               f"by typing in '{CF.BLUE}ESSA{CF.GREEN}'.{CF.RESET}\n")
     learn_fly = True
     progress()
     learn_fly = False
 
     pelaaja["coincidence"] = (f"{CF.GREEN}Well done, we are in Sweden now! I can aleady taste the korv.\n"
-                              f"Note that you just lost {CF.RED}money{CF.GREEN} and a {CF.RED}round{CF.GREEN}, increased your {CF.RED}emissions{CF.GREEN}\n"
+                              f"Note that you just lost {CF.RED}money{CF.GREEN} and a {CF.RED}round{CF.GREEN}, "
+                              f"increased your {CF.RED}emissions{CF.GREEN}\n"
                               f"and possibly experienced a coincidence that affected you. You\n"
                               f"need to keep your resources in check, if you want to reach the Rat in time!{CF.RESET}")
     progress()
 
-    pelaaja["coincidence"] = (f"{CF.GREEN}You can type in '{CF.BLUE}?{CF.GREEN}' to open the {CF.YELLOW}help menu{CF.GREEN}. You can read\n"
+    pelaaja["coincidence"] = (f"{CF.GREEN}You can type in '{CF.BLUE}?{CF.GREEN}' to open the {CF.YELLOW}help menu"
+                              f"{CF.GREEN}. You can read\n"
                               f"the rules, check the leaderboards or your own previous points.\n"
                               f"Actually, let's do it now. Type in '{CF.BLUE}?{CF.GREEN}', and fiddle around as much\n"
                               f"you want. We can continue this when you come back.{CF.RESET}")
@@ -198,8 +209,10 @@ def tutorial():
 
     pelaaja["money"] = 0
     pelaaja["coincidence"] = (f"{CF.GREEN}Oh no! Something horrible has happened, and you lost all\n"
-                              f"your money! Thanks Obama! Now you need to {CF.YELLOW}work{CF.GREEN} to gain more capital\n"
-                              f"and continue your chase. Type in '{CF.YELLOW}stay{CF.GREEN}' to, well, stay and work.{CF.RESET}")
+                              f"your money! Thanks Obama! Now you need to {CF.YELLOW}work{CF.GREEN} to gain more "
+                              f"capital\n"
+                              f"and continue your chase. Type in '{CF.YELLOW}stay{CF.GREEN}' "
+                              f"to, well, stay and work.{CF.RESET}")
     learn_work = True
     progress()
     learn_work = False
@@ -264,7 +277,7 @@ def sql_insert_score():
     player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
                               < 10 else 1) + (ROTTA["emissions"] - pelaaja["emissions"]) / 1000))
 
-    sql = "insert into goal (id, screen_name, points)"
+    sql = "insert into goal (id, screen_name, points) "
     sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
 
     cursor = sql_execute(sql, False)
@@ -285,7 +298,7 @@ def sql_execute(code: str, result: bool):
     cursor.execute(code)
     if result:
         result = cursor.fetchall()
-        return (cursor, result)
+        return cursor, result
     else:
         return cursor
 
@@ -411,7 +424,8 @@ def generate_rotta():
     # print("Rottalist: {}".format(output))
     # print("Rottalist[0]: {}".format(output[0]))
     for i in range(len(output) - 1):
-        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1] tuottaisi virheen, koska mennään listan ulkopuolelle.
+        # Tehdään funktiossa etäisyyden mittaus jokaisen rotan matkan perusteella. -1 sen takia, että [entry + 1]
+        # tuottaisi virheen, koska mennään listan ulkopuolelle.
         coords = sql_coordinate_query(
             DEST_ICAO[output[i]], DEST_ICAO[output[i + 1]]
         )
@@ -423,8 +437,8 @@ def generate_rotta():
     total_price = (len(output) - 1) * 100
     total_price += total_distance / 10
 
-    # Tuple, jossa lista Rotan sijainneista, Rotan emissiot ja Rotan matkojen hinta
-    return (output, math.floor(total_grams), math.floor(total_price))
+    # Lista Rotan sijainneista, Rotan emissiot ja Rotan matkojen hinta
+    return output, math.floor(total_grams), math.floor(total_price)
 
 
 def sql_destination(icao: str):
@@ -489,10 +503,12 @@ def hint(icao: str):
         return result[0][0]
 
 
-# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
+# Ottaa argumentiksi listan, jossa kaksi tuplea koordinaateilla (minkä sqlCoordinateQuery palauttaa) ja
+# booleanin, joka indikoi, palauttaako funktio kilometrit vai päästöt grammoina
 def check_for_dist(locs, emissions: bool):
     output = distance.distance(locs[0], locs[1]).km
-    # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos True, palauta output * 115 (päästöt grammoina)
+    # "Ternary operator" eli if else -toteamus yhdellä rivillä. Jos emissions on False, palauta output, jos
+    # True, palauta output * 115 (päästöt grammoina)
     return output if not emissions else output * 115
 
 
@@ -507,7 +523,6 @@ def trip_price(start, dest):
 def display_hint(current_location: str, can_advance: bool):
     # Säilöö pelaajan sijainnin "index-numeron" DEST_ICAO sanakirjasta
     location = [i for i in DEST_ICAO if DEST_ICAO[i] == current_location][0]
-    hint_index = 0
 
     if location < 10:
         hint_index = 1
@@ -697,7 +712,8 @@ def travel(icao: str, right: bool):
         print(
             f"{CF.RED}You have travelled to the wrong airport:{CF.RESET} {dest[1]}.")
         pelaaja["can_advance"] = False
-    # Vähentää pelaajan rahoista matkan, päivittää käytetyt kierrokset ja pelaajan tilastot, pelaaja siirtyy seuravaalle tasolle
+    # Vähentää pelaajan rahoista matkan, päivittää käytetyt kierrokset ja pelaajan tilastot,
+    # pelaaja siirtyy seuravaalle tasolle
     pelaaja["money"] -= price
     pelaaja["round"] += 1
     pelaaja["coincidence"] = coincidence(True)
@@ -733,7 +749,8 @@ def travel_loop():  # THE main loop
             input("You're already in this location. Press Enter to continue.")
             continue
         #  pelaaja valitsee oikean lentokentän (rotan aikaisempi olinpaikka)
-        if icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index in ROTTA["destinations"]:
+        if (icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and
+                icao_index in ROTTA["destinations"]):
 
             # jos pelaajalla ei ole varaa lentoon, joutuu pelaaja jäämään kentälle
             if pelaaja["money"] < price:
@@ -746,7 +763,8 @@ def travel_loop():  # THE main loop
             input("\nPress enter to continue...")
             return icao
         #  pelaaja valitsee väärän lentokentän sen hetkisen tason vaihtoehdoista
-        elif icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and icao_index not in ROTTA["destinations"]:
+        elif (icao in possible_flight_locations(pelaaja["location"], pelaaja["can_advance"], False) and
+              icao_index not in ROTTA["destinations"]):
 
             price = trip_price(pelaaja["location"], icao)
 
@@ -772,8 +790,10 @@ def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
         job = input("Choose a job to work at:\n\n"
                     f"{CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
                     f"{CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
-                    f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills (No... you can't take them)\n\n"
-                    f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / {CF.YELLOW}EXC{CF.RESET}\n\n").strip().upper()
+                    f"{CF.YELLOW}EXCHANGE{CF.RESET} = The currency excgange needs someone to count the bills "
+                    f"(No... you can't take them)\n\n"
+                    f"Type in: {CF.RED}BUR{CF.RESET} / {CF.GREEN}FLO{CF.RESET} / "
+                    f"{CF.YELLOW}EXC{CF.RESET}\n\n").strip().upper()
         if job == "?":  # käyttäjä avaa help-moduulin
             help_menu()
         elif job == "EXIT":  # Käyttäjä voi aina poistua ohjelmasta
@@ -812,29 +832,32 @@ def stay():  # käyttäjä jää lentokentälle ansaitakseen rahaa
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
         print(
-            f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)} kilograms and you have {pelaaja['money']} € left.\n")
+            f"{CF.YELLOW}You win!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)}"
+            f" kilograms and you have {pelaaja['money']} € left.\n")
         sql_insert_score()
         input("Press Enter to continue...")
         sql_scores(True)
         exit()
     else:
         print(
-            f"{CF.RED}You lost!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)} kilograms and you have {pelaaja['money']} € left.\n")
+            f"{CF.RED}You lost!{CF.RESET} Your emissions were {math.floor(pelaaja['emissions'] / 1000)} "
+            f"kilograms and you have {pelaaja['money']} € left.\n")
         input("Press Enter to continue...")
         sql_scores(True)
         exit()
 
 
 # Suvi:Pelin alkutilannefunktio. Sijainti sama kuin Rotalla aluksi. Massi 1000 e, emissiot 0, Kierros 0.
-# Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa. Niinpä funktio pyöräyttelee myös rottafunktion.
+# Tämän funktion täytyy myös pyöräyttää rotan tiedot, jotta alkupaikka on tiedossa.
+# Niinpä funktio pyöräyttelee myös rottafunktion.
 def game_start():
     # Destinations = [], emissions = int, trip_price = int
-    (destinations, emissions, trip_price) = generate_rotta()
+    destinations, emissions, rat_price = generate_rotta()
 
     # Esim: [11, 22, 33, 44, 51], vastaavat ICAO-koodeja flygarilistalla
     rotta_create = {
         "destinations": destinations,  # Lista
-        "price": trip_price,
+        "price": rat_price,
         "emissions": emissions,
         "rounds": 5,
     }
@@ -890,7 +913,8 @@ input("Press Enter to continue...")
 #############################
 # Tutorial
 play_tutorial = input(
-    f"\nPlay the {CF.MAGENTA}tutorial{CF.RESET} to learn to play the game? ({CF.GREEN}Y{CF.RESET} / {CF.RED}N{CF.RESET}): ").lower()
+    f"\nPlay the {CF.MAGENTA}tutorial{CF.RESET} to learn to play the game? ({CF.GREEN}Y{CF.RESET} / "
+    f"{CF.RED}N{CF.RESET}): ").lower()
 if play_tutorial == "exit":
     exit()
 elif play_tutorial == "y":
@@ -906,7 +930,8 @@ while pelaajan_input != "exit":
         final_round()
     status()
     pelaajan_input = input(
-        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu, '{CF.MAGENTA}stay{CF.RESET}' to stay and work,"
+        f"\n'{CF.BLUE}fly{CF.RESET}' to travel, '{CF.YELLOW}?{CF.RESET}' to open menu, "
+        f"'{CF.MAGENTA}stay{CF.RESET}' to stay and work,"
         f" '{CF.RED}exit{CF.RESET}' to quit game: ").lower().strip()
     # - pelaajan input
     if pelaajan_input == "?":  # Avaa jelppivalikko
