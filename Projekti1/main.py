@@ -35,7 +35,7 @@ os.system('cls')
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
 admin_database_name = "velkajahti"
-admin_root_name = "metropolia"
+admin_root_name = ""
 #########################################################################################
 
 DEST_ICAO = {
