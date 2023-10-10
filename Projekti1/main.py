@@ -34,6 +34,7 @@ os.system('cls')
 
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
+admin_database_name = "velkajahti"
 admin_root_passcode = "metropolia"
 #########################################################################################
 
@@ -931,7 +932,7 @@ def game_start():
 connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
-    database="velkajahti",
+    database=admin_database_name,
     user="root",
     password=admin_root_passcode,
     autocommit=True
