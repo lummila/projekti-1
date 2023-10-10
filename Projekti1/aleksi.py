@@ -951,7 +951,7 @@ pelaajan_nimi = input(
     "\nPlease enter your username to log in: ").strip().upper()
 
 # Liian pienet nimet ei vetele
-while len(pelaajan_nimi) < 3:
+while (not pelaajan_nimi) and len(pelaajan_nimi) < 3:
     pelaajan_nimi = input(
         f"{CF.YELLOW}Please enter a username longer than 2 letters:{CF.RESET} ").strip().upper()
 
