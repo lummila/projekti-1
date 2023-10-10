@@ -35,7 +35,7 @@ os.system('cls')
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
 admin_database_name = "velkajahti"
-admin_root_name = ""
+admin_root_passcode = ""
 #########################################################################################
 
 DEST_ICAO = {
@@ -926,7 +926,7 @@ connection = mysql.connector.connect(
     port=3306,
     database=admin_database_name,
     user="root",
-    password=admin_root_name,
+    password=admin_root_passcode,
     autocommit=True
 )
 #########################################################################################
