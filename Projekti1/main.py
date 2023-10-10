@@ -869,6 +869,7 @@ def final_round():
               f" kilograms and you have {pelaaja['money']} € left.\n\n"
               f"")
         final_score = sql_insert_score()
+        input("Press Enter to continue...")
         sql_scores(True)
         print(f"\n{CF.GREEN}Your score was: {final_score}\n")
         input("Press Enter to continue...")
@@ -880,8 +881,8 @@ def final_round():
               f"\t+-----------+\n\n"
               f"Your emissions were {math.floor(pelaaja['emissions'] / 1000)} "
               f"kilograms and you have {pelaaja['money']} € left.\n")
-        input("Press Enter to continue...")
         final_score = sql_insert_score()
+        input("Press Enter to continue...")
         sql_scores(True)
         print(f"\n{CF.GREEN}Your score was: {final_score}\n")
         input("Press Enter to continue...")

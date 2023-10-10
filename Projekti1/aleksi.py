@@ -34,6 +34,7 @@ os.system('cls')
 
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
+admin_database_name = "velkajahti"
 admin_root_name = "metropolia"
 #########################################################################################
 
@@ -67,11 +68,10 @@ DEST_ICAO = {
 }
 
 OHJEET = (f"------------------------------------------------------------------------------------------\n"
-          f"Welcome to {CF.YELLOW}Chase The Rat{CF.RESET}! {CF.RED}This guide is not required, but may help you "
-          f"understand the game.{CF.RESET}\n\nYou'll need to enter an existing {CF.YELLOW}username{CF.RESET}"
+          f"Welcome to {CF.YELLOW}Chase The Rat{CF.RESET}! {CF.RED}This guide is not required, but may help you understand the game.{CF.RESET}\n\nYou'll need to enter an existing {CF.YELLOW}username{CF.RESET} "
           f"and a {CF.YELLOW}PIN-code{CF.RESET} to play with your user\n"
           f"OR you can create new {CF.YELLOW}username{CF.RESET} and a {CF.YELLOW}PIN-code{CF.RESET}.\n\n"
-          f"In this game you'll travel between different {CF.YELLOW}airports{CF.RESET}, trying to find '{CF.RED}the Rat{CF.RESET}' who owes"
+          f"In this game you'll travel between different {CF.YELLOW}airports{CF.RESET}, trying to find '{CF.RED}the Rat{CF.RESET}' who owes "
           f"you money.\nThe rat has done some airport-hopping "
           f"and the game will give you {CF.YELLOW}clues{CF.RESET} of his route and {CF.YELLOW}final location{CF.RESET}.\n"
           f"Each game will draw a new route of {CF.YELLOW}five airports{CF.RESET}, the fifth being the current location of "
@@ -101,7 +101,7 @@ POS_COINCIDENCES = [
     "Lucky you! The flight company made a mistake with your tickets. You'll be getting 80€ cashback!\n(80€ will be "
     "added to your account)",
     "There was a free seat at a more eco-friendly airplane!\n(10kg was removed from your emissions)",
-    "The airplane took a shorter route. Emissions were 50kg less than expected.\n(50kg of emissions will be removed)",
+    "The airplane took a shorter route. Emissions were 10kg less than expected.\n(10kg of emissions will be removed)",
     "Nothing of note has happened."
 ]
 
@@ -132,34 +132,28 @@ def sql_scores(leaderboard: bool):
 
     _, result = sql_execute(sql, True)
 
+    if not result:
+        print("ERROR fetching scores in sql_scores()")
+        return False
+
     clear()
 
     if leaderboard:
         print("+----------------------------------------------------+")
         print("| The leaderboard of top 10 scores in Chase the Rat: |")
         print("+----------------------------------------------------+")
-
-        if not result:
-            print("  No top scores available.")
-        else:
-            for entry in result:
-                print(
-                    f"  {entry[0]}\t\t{entry[1]}")
+        for entry in result:
+            print(
+                f"  {entry[0]}\t\t{entry[1]}")
         print("+----------------------------------------------------+")
     else:
         print("+----------------------------------------------------+")
         print("|            Your personal best scores:              |")
         print("+----------------------------------------------------+")
-
-        if not result:
-            print("  No personal scores available.")
-        else:
-            for entry in result:
-                print(
-                    f"  {entry[0]}")
+        for entry in result:
+            print(
+                f"  {entry[0]}")
         print("+----------------------------------------------------+")
-
-    input("\nPress Enter to continue...")
 
     return True
 
@@ -170,16 +164,12 @@ def sql_insert_score():
 
     _, result = sql_execute(sql, True)
     if not result:
-        print("ERROR fetching player name in sql_insert_score()")
+        print("ERROR fetching player id in sql_insert_score()")
         return False
 
     player_id = result[0][0]
-    emissions_result = (ROTTA["emissions"] - pelaaja["emissions"]) / 1000
-    player_score = math.floor(pelaaja["money"] * ((10 - pelaaja["round"]) if pelaaja["round"]
-                              < 10 else 1) + emissions_result if emissions_result > 0 else 0)
-
-    if player_score <= 0:
-        player_score = 1
+    player_score = math.floor((pelaaja["money"] * (10 - pelaaja["round"] if pelaaja["round"]
+                              < 10 else 1) + (ROTTA["emissions"] - pelaaja["emissions"]) / 1000))
 
     sql = "insert into goal (id, screen_name, points) "
     sql += f"values ({player_id}, '{pelaaja['name']}', {player_score});"
@@ -189,7 +179,7 @@ def sql_insert_score():
         print("ERROR inserting player record in sql_insert_score()")
         return False
 
-    return True
+    return player_score
 
 
 # Lyhennys sql:n kanssa kommunikoinnissa
@@ -234,7 +224,7 @@ def sql_login(username: str):
                 "Enter your new 4-digit PIN code: ")
 
             # Jos PIN-koodi ei ole validi
-            while not new_PIN.isdigit() or (len(new_PIN) != 4):
+            while len(new_PIN) != 4 or not new_PIN.isdigit():
                 # Pitää muistaa aina päästää käyttäjä pois
                 if new_PIN == "exit":
                     exit()
@@ -243,8 +233,8 @@ def sql_login(username: str):
                         f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
 
             # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
-            sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
-            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
+            sql_new_user = "insert into game (screen_name, location, passcode) "
+            sql_new_user += f"values ('{username}', 'EFHK', {int(new_PIN)});"
 
             cursor.reset()
             cursor.execute(sql_new_user)
@@ -262,13 +252,9 @@ def sql_login(username: str):
     else:
         old_user_PIN = input("Input your 4-digit PIN code: ")
 
-        while not old_user_PIN.isdigit() or (len(old_user_PIN) != 4):
-            # Pitää muistaa aina päästää käyttäjä pois
-            if old_user_PIN == "exit":
-                exit()
-            else:
-                old_user_PIN = input(
-                    f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
+        # Käyttäjän pitää aina päästä ulos
+        if old_user_PIN.upper() == "EXIT":
+            exit()
 
         old_user_PIN = int(old_user_PIN)
 
@@ -563,10 +549,12 @@ def display_hint(current_location: str, can_advance: bool):
         hint_index = 3
     elif location < 40:
         hint_index = 4
+    elif location < 50:
+        hint_index = 5
     else:
         hint_index = 5
 
-    if not can_advance and location < 50:
+    if not can_advance and hint_index != 5:
         hint_index -= 1
 
     return sql_hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
@@ -629,7 +617,7 @@ def status():
           f"+---------------------------------------------------------+\n")
 
     # Mahdollinen edellisen kierroksen sattuma
-    print(f"{pelaaja['coincidence']}\n")
+    print(f"{CF.CYAN}{pelaaja['coincidence']}\n{CF.RESET}")
 
     # Printtaa pelaajan tämänhetkisen vihjeen
     print(
@@ -676,11 +664,13 @@ def help_menu():
             return
         elif help_input == "leaderboard":  # Tulostaa top 10 pisteet
             sql_scores(True)
+            input("\nPress Enter to continue...")
             status()
             help_menu()  # Palaa takaisin apuvalikkoon
             return
         elif help_input == "personal":  # Tulostaa omat pisteet
             sql_scores(False)
+            input("\nPress Enter to continue...")
             status()
             help_menu()  # Palaa takaisin apuvalikkoon
             return
@@ -705,8 +695,8 @@ def coincidence(positive: bool):
             elif index == 2:
                 pelaaja["money"] += 80
             elif index in [3, 4]:
-                if pelaaja["emissions"] >= 50000:
-                    pelaaja["emissions"] -= 50000
+                if pelaaja["emissions"] >= 10000:
+                    pelaaja["emissions"] -= 10000
                 else:
                     pelaaja["emissions"] = 0
     for index, text in enumerate(NEG_COINCIDENCES):
@@ -831,7 +821,7 @@ def stay():
         clear()
         status()
         print(
-            f"\n+ You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n|")
+            f"+ You have decided or had to stay at {CF.YELLOW}{pelaaja['location']}{CF.RESET} and work for money!\n|")
         job = input("| Choose a job to work at:\n|\n"
                     f"| {CF.RED}BURGER{CF.RESET} = You're going to be flipping some burgers.\n"
                     f"| {CF.GREEN}FLOWER{CF.RESET} = The flower shop could need a hand.\n"
@@ -871,23 +861,31 @@ def stay():
 # Final Round päättää pelin ja pyörittää top 10 players joka tapauksessa.
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
+        clear()
         print(f"\t+----------+\n"
               f"\t| {CF.YELLOW}You win!{CF.RESET} |\n"
               f"\t+----------+\n\n"
               f"Your emissions were {math.floor(pelaaja['emissions'] / 1000)}"
-              f" kilograms and you have {pelaaja['money']} € left.\n")
-        sql_insert_score()
+              f" kilograms and you have {pelaaja['money']} € left.\n\n"
+              f"")
+        final_score = sql_insert_score()
         input("Press Enter to continue...")
         sql_scores(True)
+        print(f"\n{CF.GREEN}Your score was: {final_score}\n")
+        input("Press Enter to continue...")
         exit()
     else:
+        clear()
         print(f"\t+-----------+\n"
               f"\t| {CF.RED}You lost!{CF.RESET} |\n"
               f"\t+-----------+\n\n"
               f"Your emissions were {math.floor(pelaaja['emissions'] / 1000)} "
               f"kilograms and you have {pelaaja['money']} € left.\n")
+        final_score = sql_insert_score()
         input("Press Enter to continue...")
         sql_scores(True)
+        print(f"\n{CF.GREEN}Your score was: {final_score}\n")
+        input("Press Enter to continue...")
         exit()
 
 
@@ -927,7 +925,7 @@ def game_start():
 connection = mysql.connector.connect(
     host="127.0.0.1",
     port=3306,
-    database="velkajahti",
+    database=admin_database_name,
     user="root",
     password=admin_root_name,
     autocommit=True
@@ -951,7 +949,7 @@ elif instructions == "y":
 #########################################################################################
 clear()
 pelaajan_nimi = input(
-    "Please enter your username to log in: ").strip().upper()
+    "\nPlease enter your username to log in: ").strip().upper()
 
 # Liian pienet nimet ei vetele
 while len(pelaajan_nimi) < 3:
