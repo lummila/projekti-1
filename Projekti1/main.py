@@ -158,8 +158,6 @@ def sql_scores(leaderboard: bool):
                     f"  {entry[0]}")
         print("+----------------------------------------------------+")
 
-    input("\nPress Enter to continue...")
-
     return True
 
 
@@ -187,7 +185,7 @@ def sql_insert_score():
         print("ERROR inserting player record in sql_insert_score()")
         return False
 
-    return True
+    return player_score
 
 
 # Lyhennys sql:n kanssa kommunikoinnissa
@@ -674,11 +672,13 @@ def help_menu():
             return
         elif help_input == "leaderboard":  # Tulostaa top 10 pisteet
             sql_scores(True)
+            input("\nPress Enter to continue...")
             status()
             help_menu()  # Palaa takaisin apuvalikkoon
             return
         elif help_input == "personal":  # Tulostaa omat pisteet
             sql_scores(False)
+            input("\nPress Enter to continue...")
             status()
             help_menu()  # Palaa takaisin apuvalikkoon
             return
@@ -869,16 +869,20 @@ def stay():
 # Final Round päättää pelin ja pyörittää top 10 players joka tapauksessa.
 def final_round():
     if pelaaja["location"] == DEST_ICAO[ROTTA["destinations"][5]]:
+        clear()
         print(f"\t+----------+\n"
               f"\t| {CF.YELLOW}You win!{CF.RESET} |\n"
               f"\t+----------+\n\n"
               f"Your emissions were {math.floor(pelaaja['emissions'] / 1000)}"
-              f" kilograms and you have {pelaaja['money']} € left.\n")
-        sql_insert_score()
-        input("Press Enter to continue...")
+              f" kilograms and you have {pelaaja['money']} € left.\n\n"
+              f"")
+        final_score = sql_insert_score()
         sql_scores(True)
+        print(f"\n{CF.GREEN}Your score was: {final_score}\n")
+        input("Press Enter to continue...")
         exit()
     else:
+        clear()
         print(f"\t+-----------+\n"
               f"\t| {CF.RED}You lost!{CF.RESET} |\n"
               f"\t+-----------+\n\n"
@@ -886,6 +890,8 @@ def final_round():
               f"kilograms and you have {pelaaja['money']} € left.\n")
         input("Press Enter to continue...")
         sql_scores(True)
+        print(f"\n{CF.GREEN}Your score was: {final_score}\n")
+        input("Press Enter to continue...")
         exit()
 
 
