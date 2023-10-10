@@ -233,8 +233,8 @@ def sql_login(username: str):
                         f"{CF.RED}Entered PIN code is invalid. Please enter a 4-number PIN code:{CF.RESET} ")
 
             # Jos PIN-koodi on oikea, syötetään uusi käyttäjä tietokantaan.
-            sql_new_user = "insert into game (co2_consumed, co2_budget, screen_name, location, money, passcode) "
-            sql_new_user += f"values (0, 0, '{username}', 'EFHK', 0, {int(new_PIN)});"
+            sql_new_user = "insert into game (screen_name, location, passcode) "
+            sql_new_user += f"values ('{username}', 'EFHK', {int(new_PIN)});"
 
             cursor.reset()
             cursor.execute(sql_new_user)
