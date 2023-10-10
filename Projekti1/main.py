@@ -35,7 +35,7 @@ os.system('cls')
 #########################################################################################
 # VAIHDA TÄMÄ SIIHEN, MIKÄ SALASANA PELAAJALLA ON TIETOKANTAHALLINTOJÄRJESTELMÄSSÄÄN!
 admin_database_name = "velkajahti"
-admin_root_name = ""
+admin_root_name = "metropolia"
 #########################################################################################
 
 DEST_ICAO = {
@@ -554,7 +554,7 @@ def display_hint(current_location: str, can_advance: bool):
     else:
         hint_index = 5
 
-    if not can_advance and hint_index != 5:
+    if not can_advance and location < 50:
         hint_index -= 1
 
     return sql_hint(DEST_ICAO[ROTTA["destinations"][hint_index]])
@@ -869,7 +869,7 @@ def final_round():
               f" kilograms and you have {pelaaja['money']} € left.\n\n"
               f"")
         final_score = sql_insert_score()
-        input("Press Enter to continue...")
+        input("Press Enter to see how you placed on the leaderboard:")
         sql_scores(True)
         print(f"\n{CF.GREEN}Your score was: {final_score}\n")
         input("Press Enter to continue...")
@@ -881,10 +881,9 @@ def final_round():
               f"\t+-----------+\n\n"
               f"Your emissions were {math.floor(pelaaja['emissions'] / 1000)} "
               f"kilograms and you have {pelaaja['money']} € left.\n")
-        final_score = sql_insert_score()
-        input("Press Enter to continue...")
+
+        input("Press Enter to see the leaderboard:")
         sql_scores(True)
-        print(f"\n{CF.GREEN}Your score was: {final_score}\n")
         input("Press Enter to continue...")
         exit()
 
