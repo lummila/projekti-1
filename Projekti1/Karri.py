@@ -209,19 +209,19 @@ def stay():  #  käyttäjä jää lentokentälle ansaitakseen rahaa
             pelaaja["money"] += 175
             pelaaja["round"] += 1
             input("Press Enter to continue...")
-            return
+            return True
         elif job == "FLO":  #  työvaihtoehto 2
             print("\n You decided to go and wrap some flowers! Here's some cash to keep you going!")
             pelaaja["money"] += 175
             pelaaja["round"] += 1
             input("Press Enter to continue...")
-            return
+            return True
         elif job == "EXC":  #  työvaihtoehto 3
             print("\n We will trust that you count the bills correctly! Take some money!")
             pelaaja["money"] += 175
             pelaaja["round"] += 1
             input("Press Enter to continue...")
-            return
+            return True
         else:  #  käyttäjä on nakkisormi
             print(f"{CF.RED}\nInvalid input, please try again.{CF.RESET}")
             time.sleep(3.0)
