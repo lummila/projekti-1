@@ -1,23 +1,19 @@
-# projekti-1
-Ekan syksyn ohjelmointiprojekti
+# VELKAJAHTI / CHASE THE RAT
 
-Vaiheet tarkottaa määrittelydokumentista löytyvää pelin kulku -taulukkoa
+Ennen pelausta, tee seuraavat toimenpiteet:
 
-TYÖNJAKO:
+- Asenna velkajahti.sql MariaDB-tietokannan lähdetiedostona.
+- Avaa main.py
+-- Rivillä 37 on muuttuja 'admin_database_name', oletuksena "velkajahti". VAIHDA TÄMÄ ASENTAMASI TIETOKANNAN NIMEEN!
+-- Rivillä 38 on muuttuja 'admin_root_passcode'. VAIHDA TÄMÄ SIIHEN SALASANAAN, JOKA SINULLA ON ROOT-KÄYTTÄJÄLLÄ MARIADB:SSÄ! (Suositeltu.)
 
-Aleksi:
-- Tietokannan täyttö peliin soveltuvaksi (Airport, Country, Game, Game-Results)
-- VAIHE 1: Tietokantaan liittyvät funktiot
+HUOM PYCHARMIN KÄYTTÄJÄ:
+Pycharm ei automaattisesti simuloi Windowsin terminaalia. Peli käyttää ahkerasti os.system("cls") -komentoa, ja tämä ei automaattisesti toimi Pycharmissa.
 
-Elli:
-- VAIHE 2 ja 2.1: Ohjeiden listaaminen
-- VAIHE 4.1: Sattuma-funktio, oikea kohde
-- VAIHE 4.2: Väärä kohde
-
-Karri:
-- VAIHE 4: Pelin päälooppi, tietojen ajan tasalla pitäminen
-- Poikkeavat suoritustavat
-
-Suvi:
-- VAIHE 3: Rottafunktiot ja pelin lähtötilanne
-- VAIHE 5: Viimeisen tason funktiot
+Seuraa näitä ohjeita:
+- Avaa "Run/Debug configurations" -valikko (yläpalkissa oikealla, "Current file")
+- Current file kohdasta valitse alivalikko (kolme pistettä jonossa)
+- "Run with parameters"
+- "Modify options"
+- Valitse Python kohdasta "Emulate terminal in output console".
+- Apply & Run
